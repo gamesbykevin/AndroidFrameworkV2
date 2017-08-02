@@ -77,17 +77,13 @@ public abstract class Entity extends Cell implements ICommon {
     }
 
     /**
-     *
-     * @param transparency
+     * Set the transparency of this entity
+     * @param transparency 1.0 fully opaque, 0.0 invisible
      */
     public void setTransparency(final float transparency) {
         this.transparency = transparency;
     }
 
-    /**
-     *
-     * @return
-     */
     public float getTransparency() {
         return this.transparency;
     }
