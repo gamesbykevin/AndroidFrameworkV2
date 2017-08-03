@@ -52,7 +52,6 @@ public abstract class Entity extends Cell implements ICommon {
     //current facing angle of the entity
     private float angle = 0.0f;
 
-
     /**
      * Default constructor
      */
