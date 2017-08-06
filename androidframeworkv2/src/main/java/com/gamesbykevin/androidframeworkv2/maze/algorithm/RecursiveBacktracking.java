@@ -22,9 +22,9 @@ public class RecursiveBacktracking extends Maze
     //list of places visited, used to help generate the maze
     private List<Cell> steps;
     
-    public RecursiveBacktracking(final int cols, final int rows) throws Exception
+    public RecursiveBacktracking(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //set 4 walls for each room
         super.populateRooms();

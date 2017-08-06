@@ -16,16 +16,20 @@ public class Prims extends Maze
 {
     //list of rooms to check
     private List<Room> options;
-    
-    public Prims(final int cols, final int rows) throws Exception
+
+    //list of rooms for us to check on
+    private List<Room> checking;
+
+    public Prims(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //set 4 walls for each room
         super.populateRooms();
         
         //create a new list of optional rooms
-        this.options = new ArrayList<Room>();
+        this.options = new ArrayList<>();
+        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -72,51 +76,76 @@ public class Prims extends Maze
         //if we have started
         if (MazeHelper.hasVisited(this))
         {
+            checking.clear();
+
             //check if any neighbors can be joined to the room
-            final Room east = getRoom(room.getCol() + 1, room.getRow());
-            final Room west = getRoom(room.getCol() - 1, room.getRow());
-            final Room north = getRoom(room.getCol(), room.getRow() - 1);
-            final Room south = getRoom(room.getCol(), room.getRow() + 1);
-            
+            if (isHexagon()) {
+
+                checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+                checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+                checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
+                checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
+                checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
+                checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
+
+            } else {
+
+                checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
+                checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
+                checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+                checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+            }
+
             //list of choices to move to
             final List<Room> choices = new ArrayList<Room>();
-            
+
             //we only want to add the room that exists and is already visited to join with
-            if (east != null && east.hasVisited())
-                choices.add(east);
-            if (west != null && west.hasVisited())
-                choices.add(west);
-            if (north != null && north.hasVisited())
-                choices.add(north);
-            if (south != null && south.hasVisited())
-                choices.add(south);
-            
+            for (int i = 0; i < checking.size(); i++) {
+                Room tmp = checking.get(i);
+
+                if (tmp != null && tmp.hasVisited())
+                    choices.add(tmp);
+            }
+
             //the other room
             final Room other = choices.get(random.nextInt(choices.size()));
             
             //join the rooms
-            MazeHelper.joinRooms(room, other);
+            MazeHelper.joinRooms(isHexagon(), room, other);
         }
         
         //mark the room as visited
         room.setVisited(true);
-        
-        //check if any neighbors can be added to the list
-        final Room east = getRoom(room.getCol() + 1, room.getRow());
-        final Room west = getRoom(room.getCol() - 1, room.getRow());
-        final Room north = getRoom(room.getCol(), room.getRow() - 1);
-        final Room south = getRoom(room.getCol(), room.getRow() + 1);
-        
+
+
+        checking.clear();
+
+        //check if any neighbors can be joined to the room
+        if (isHexagon()) {
+
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+            checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
+            checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
+            checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
+            checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
+
+        } else {
+
+            checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
+            checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+        }
+
         //add any optional directions that haven't been visited and don't already exist in the list
-        if (east != null && !east.hasVisited() && !options.contains(east))
-            options.add(east);
-        if (west != null && !west.hasVisited() && !options.contains(west))
-            options.add(west);
-        if (north != null && !north.hasVisited() && !options.contains(north))
-            options.add(north);
-        if (south != null && !south.hasVisited() && !options.contains(south))
-            options.add(south);
-        
+        for (int i = 0; i < checking.size(); i++) {
+            Room tmp = checking.get(i);
+
+            if (tmp != null && !tmp.hasVisited() && !options.contains(tmp))
+                options.add(tmp);
+        }
+
         //increase the progress
         super.getProgress().increase();
         

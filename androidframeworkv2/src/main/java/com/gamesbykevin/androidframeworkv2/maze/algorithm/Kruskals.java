@@ -16,12 +16,18 @@ import java.util.UUID;
  */
 public class Kruskals extends Maze
 {
-    public Kruskals(final int cols, final int rows) throws Exception
+    //list of rooms for us to check on
+    private List<Room> checking;
+
+    public Kruskals(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
-        //set 4 walls for each room
+        //set walls for each room
         super.populateRooms();
+
+        //create new list of rooms
+        this.checking = new ArrayList<>();
     }
     
     /**
@@ -40,23 +46,43 @@ public class Kruskals extends Maze
         final Room room = getLowestWeight(random);
         
         //create a list of optional directions to randomly choose from
-        List<Room.Wall> directions = new ArrayList<Room.Wall>();
+        List<Room.Wall> directions = new ArrayList<>();
 
         //now check if not part of a set for each neighbor (north, south, east, west)
         final Room east = getRoom(room.getCol() + 1, room.getRow());
         final Room west = getRoom(room.getCol() - 1, room.getRow());
         final Room north = getRoom(room.getCol(), room.getRow() - 1);
         final Room south = getRoom(room.getCol(), room.getRow() + 1);
+        final Room northEast = getRoom(room.getCol() + 1, room.getRow() - 1);
+        final Room northWest = getRoom(room.getCol() - 1, room.getRow() - 1);
+        final Room southEast = getRoom(room.getCol() + 1, room.getRow() + 1);
+        final Room southWest = getRoom(room.getCol() - 1, room.getRow() + 1);
 
-        //if the room exists and is not part of the same set
-        if (east != null && !east.hasId(room))
-            directions.add(Wall.East);
-        if (west != null && !west.hasId(room))
-            directions.add(Wall.West);
-        if (north != null && !north.hasId(room))
-            directions.add(Wall.North);
-        if (south != null && !south.hasId(room))
-            directions.add(Wall.South);
+        if (isHexagon()) {
+            //if the room exists and is not part of the same set
+            if (north != null && !north.hasId(room))
+                directions.add(Wall.North);
+            if (northEast != null && !northEast.hasId(room))
+                directions.add(Wall.NorthEast);
+            if (northWest != null && !northWest.hasId(room))
+                directions.add(Wall.NorthWest);
+            if (south != null && !south.hasId(room))
+                directions.add(Wall.South);
+            if (southEast != null && !southEast.hasId(room))
+                directions.add(Wall.SouthEast);
+            if (southWest != null && !southWest.hasId(room))
+                directions.add(Wall.SouthWest);
+        } else {
+            //if the room exists and is not part of the same set
+            if (east != null && !east.hasId(room))
+                directions.add(Wall.East);
+            if (west != null && !west.hasId(room))
+                directions.add(Wall.West);
+            if (north != null && !north.hasId(room))
+                directions.add(Wall.North);
+            if (south != null && !south.hasId(room))
+                directions.add(Wall.South);
+        }
 
         //now randomly join a neighboring room
         joinRooms(room, directions.get(random.nextInt(directions.size())));
@@ -174,23 +200,35 @@ public class Kruskals extends Maze
     {
         //keep track of the count
         int count = 0;
-        
+
+        checking.clear();
+
         //now check if not part of a set for each neighbor (north, south, east, west)
-        final Room east = getRoom(room.getCol() + 1, room.getRow());
-        final Room west = getRoom(room.getCol() - 1, room.getRow());
-        final Room north = getRoom(room.getCol(), room.getRow() - 1);
-        final Room south = getRoom(room.getCol(), room.getRow() + 1);
-        
-        //if the room exists and is not part of the same set
-        if (east != null && !east.hasId(room))
-            count++;
-        if (west != null && !west.hasId(room))
-            count++;
-        if (north != null && !north.hasId(room))
-            count++;
-        if (south != null && !south.hasId(room))
-            count++;
-        
+        if (isHexagon()) {
+
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+            checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
+            checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
+            checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
+            checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
+
+        } else {
+
+            checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
+            checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+        }
+
+        for (int i = 0; i < checking.size(); i++) {
+            Room tmp = checking.get(i);
+
+            //if the room exists and is not part of the same set
+            if (tmp != null && !tmp.hasId(room))
+                count++;
+        }
+
         return count;
     }
     
@@ -229,6 +267,30 @@ public class Kruskals extends Maze
     {
         switch (direction)
         {
+            case NorthEast:
+                //remove the appropriate walls
+                room.removeWall(Wall.NorthEast);
+                getRoom(room.getCol() + 1, room.getRow() - 1).removeWall(Wall.SouthWest);
+                break;
+
+            case NorthWest:
+                //remove the appropriate walls
+                room.removeWall(Wall.NorthWest);
+                getRoom(room.getCol() - 1, room.getRow() - 1).removeWall(Wall.SouthEast);
+                break;
+
+            case SouthEast:
+                //remove the appropriate walls
+                room.removeWall(Wall.SouthEast);
+                getRoom(room.getCol() + 1, room.getRow() + 1).removeWall(Wall.NorthWest);
+                break;
+
+            case SouthWest:
+                //remove the appropriate walls
+                room.removeWall(Wall.SouthWest);
+                getRoom(room.getCol() - 1, room.getRow() + 1).removeWall(Wall.NorthEast);
+                break;
+
             case East:
                 //remove the appropriate walls
                 room.removeWall(Wall.East);
@@ -288,17 +350,33 @@ public class Kruskals extends Maze
             
             //mark as visited
             tmp.setVisited(true);
-            
+
             //if there is no wall and the neighboring room has not been visited yet
-            if (!tmp.hasWall(Wall.East) && !getRoom(tmp.getCol() + 1, tmp.getRow()).hasVisited())
-                rooms.add(getRoom(tmp.getCol() + 1, tmp.getRow()));
-            if (!tmp.hasWall(Wall.West) && !getRoom(tmp.getCol() - 1, tmp.getRow()).hasVisited())
-                rooms.add(getRoom(tmp.getCol() - 1, tmp.getRow()));
-            if (!tmp.hasWall(Wall.North) && !getRoom(tmp.getCol(), tmp.getRow() - 1).hasVisited())
-                rooms.add(getRoom(tmp.getCol(), tmp.getRow() - 1));
-            if (!tmp.hasWall(Wall.South) && !getRoom(tmp.getCol(), tmp.getRow() + 1).hasVisited())
-                rooms.add(getRoom(tmp.getCol(), tmp.getRow() + 1));
-            
+            if (isHexagon()) {
+                if (!tmp.hasWall(Wall.North) && !getRoom(tmp.getCol(), tmp.getRow() - 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol(), tmp.getRow() - 1));
+                if (!tmp.hasWall(Wall.NorthWest) && !getRoom(tmp.getCol() - 1, tmp.getRow() - 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() - 1, tmp.getRow() - 1));
+                if (!tmp.hasWall(Wall.NorthEast) && !getRoom(tmp.getCol() + 1, tmp.getRow() - 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() + 1, tmp.getRow() - 1));
+
+                if (!tmp.hasWall(Wall.South) && !getRoom(tmp.getCol(), tmp.getRow() + 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol(), tmp.getRow() + 1));
+                if (!tmp.hasWall(Wall.SouthWest) && !getRoom(tmp.getCol() - 1, tmp.getRow() + 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() - 1, tmp.getRow() + 1));
+                if (!tmp.hasWall(Wall.SouthEast) && !getRoom(tmp.getCol() + 1, tmp.getRow() + 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() + 1, tmp.getRow() + 1));
+            } else {
+                if (!tmp.hasWall(Wall.East) && !getRoom(tmp.getCol() + 1, tmp.getRow()).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() + 1, tmp.getRow()));
+                if (!tmp.hasWall(Wall.West) && !getRoom(tmp.getCol() - 1, tmp.getRow()).hasVisited())
+                    rooms.add(getRoom(tmp.getCol() - 1, tmp.getRow()));
+                if (!tmp.hasWall(Wall.North) && !getRoom(tmp.getCol(), tmp.getRow() - 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol(), tmp.getRow() - 1));
+                if (!tmp.hasWall(Wall.South) && !getRoom(tmp.getCol(), tmp.getRow() + 1).hasVisited())
+                    rooms.add(getRoom(tmp.getCol(), tmp.getRow() + 1));
+            }
+
             //remove room from list
             rooms.remove(0);
         }

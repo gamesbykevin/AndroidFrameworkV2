@@ -1,5 +1,7 @@
 package com.gamesbykevin.androidframeworkv2.maze;
 
+import com.gamesbykevin.androidframeworkv2.maze.Room.Wall;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,44 +18,72 @@ public class MazeHelper
      * @param room2 Room 2
      * @throws Exception If the rooms are not neighbors
      */
-    public static void joinRooms(final Room room1, final Room room2) throws Exception
+    public static void joinRooms(final boolean hexagon, final Room room1, final Room room2) throws Exception
     {
-        //the rooms need to be direct neighbors either vertically or horizontally
-        if (room1.getCol() != room2.getCol() && room1.getRow() != room2.getRow())
-            throw new Exception("The rooms are not neighbors");
-        
+        //calculate how distant the rooms are from one another
+        int colDiff = (room1.getCol() > room2.getCol()) ? room1.getCol() - room2.getCol() : room2.getCol() - room1.getCol();
+        int rowDiff = (room1.getRow() > room2.getRow()) ? room1.getRow() - room2.getRow() : room2.getRow() - room1.getRow();
+
         //make sure the distance isn't too far apart
-        if (room1.getCol() - room2.getCol() > 1 || room1.getCol() - room2.getCol() < -1)
+        if (colDiff > 1 || colDiff < -1 || rowDiff > 1 || rowDiff < -1)
             throw new Exception("The rooms are not neighbors");
-        if (room1.getRow() - room2.getRow() > 1 || room1.getRow() - room2.getRow() < -1)
-            throw new Exception("The rooms are not neighbors");
-        
-        //if the columns are not equal they are horizontal neighbors
-        if (room1.getCol() != room2.getCol())
-        {
-            if (room1.getCol() > room2.getCol())
-            {
-                room1.removeWall(Room.Wall.West);
-                room2.removeWall(Room.Wall.East);
+
+        if (hexagon) {
+            if (colDiff != 0) {
+
+                if (room1.getCol() > room2.getCol()) {
+
+                    if (room1.getRow() > room2.getRow()) {
+                        room1.removeWall(Wall.NorthWest);
+                        room2.removeWall(Wall.SouthEast);
+                    } else {
+                        room1.removeWall(Wall.SouthWest);
+                        room1.removeWall(Wall.NorthEast);
+                    }
+
+                } else {
+
+                    if (room1.getRow() > room2.getRow()) {
+                        room1.removeWall(Wall.NorthEast);
+                        room2.removeWall(Wall.SouthWest);
+                    } else {
+                        room1.removeWall(Wall.SouthEast);
+                        room2.removeWall(Wall.NorthWest);
+                    }
+                }
+
+            } else {
+
+                if (room1.getRow() > room2.getRow()) {
+                    room1.removeWall(Wall.North);
+                    room2.removeWall(Wall.South);
+                } else {
+                    room1.removeWall(Wall.South);
+                    room2.removeWall(Wall.North);
+                }
             }
-            else
-            {
-                room1.removeWall(Room.Wall.East);
-                room2.removeWall(Room.Wall.West);
-            }
-        }
-        else
-        {
-            //they are vertical neighbors
-            if (room1.getRow() > room2.getRow())
-            {
-                room1.removeWall(Room.Wall.North);
-                room2.removeWall(Room.Wall.South);
-            }
-            else
-            {
-                room1.removeWall(Room.Wall.South);
-                room2.removeWall(Room.Wall.North);
+
+        } else {
+
+
+            //if the columns are not equal they are horizontal neighbors
+            if (colDiff != 0) {
+                if (room1.getCol() > room2.getCol()) {
+                    room1.removeWall(Room.Wall.West);
+                    room2.removeWall(Room.Wall.East);
+                } else {
+                    room1.removeWall(Room.Wall.East);
+                    room2.removeWall(Room.Wall.West);
+                }
+            } else {
+                //they are vertical neighbors
+                if (room1.getRow() > room2.getRow()) {
+                    room1.removeWall(Room.Wall.North);
+                    room2.removeWall(Room.Wall.South);
+                } else {
+                    room1.removeWall(Room.Wall.South);
+                    room2.removeWall(Room.Wall.North);
+                }
             }
         }
     }
@@ -94,18 +124,40 @@ public class MazeHelper
             
             //flag the current room as visited
             room.setVisited(true);
-            
-            //check if the west room can be added to the options list
-            performRoomCheck(maze, room, Room.Wall.West, options);
-            
-            //check if the east room can be added to the options list
-            performRoomCheck(maze, room, Room.Wall.East, options);
-            
-            //check if the north room can be added to the options list
-            performRoomCheck(maze, room, Room.Wall.North, options);
-            
-            //check if the south room can be added to the options list
-            performRoomCheck(maze, room, Room.Wall.South, options);
+
+            if (maze.isHexagon()) {
+
+                //check if the north room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.North, options);
+
+                //check if the south room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.South, options);
+
+                //check if the north room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.NorthEast, options);
+
+                //check if the south room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.SouthEast, options);
+
+                //check if the north room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.NorthWest, options);
+
+                //check if the south room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.SouthWest, options);
+
+            } else {
+                //check if the west room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.West, options);
+
+                //check if the east room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.East, options);
+
+                //check if the north room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.North, options);
+
+                //check if the south room can be added to the options list
+                performRoomCheck(maze, room, Room.Wall.South, options);
+            }
             
             //now that we have checked the current room, remove from our list
             options.remove(0);
@@ -141,7 +193,23 @@ public class MazeHelper
             case North:
                 room = maze.getRoom(current.getCol(), current.getRow() - 1);
                 break;
-                
+
+            case NorthWest:
+                room = maze.getRoom(current.getCol() - 1, current.getRow() - 1);
+                break;
+
+            case NorthEast:
+                room = maze.getRoom(current.getCol() + 1, current.getRow() - 1);
+                break;
+
+            case SouthWest:
+                room = maze.getRoom(current.getCol() - 1, current.getRow() + 1);
+                break;
+
+            case SouthEast:
+                room = maze.getRoom(current.getCol() + 1, current.getRow() + 1);
+                break;
+
             default:
                 throw new Exception("Direction not setup here " + direction.toString());
         }

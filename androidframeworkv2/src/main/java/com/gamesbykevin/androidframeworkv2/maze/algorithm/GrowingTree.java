@@ -16,17 +16,21 @@ public class GrowingTree extends Maze
 {
     //temporary list of optional rooms
     private List<Room> options, tmp;
-    
-    public GrowingTree(final int cols, final int rows) throws Exception
+
+    //list of rooms for us to check on
+    private List<Room> checking;
+
+    public GrowingTree(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //fill all walls
         super.populateRooms();
         
         //create new lists
-        this.options = new ArrayList<Room>();
-        this.tmp = new ArrayList<Room>();
+        this.options = new ArrayList<>();
+        this.tmp = new ArrayList<>();
+        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -80,25 +84,38 @@ public class GrowingTree extends Maze
         //get that random room
         final Room room = options.get(index);
         
+        checking.clear();
+
         //check neighbors
-        final Room east = getRoom(room.getCol() + 1, room.getRow());
-        final Room west = getRoom(room.getCol() - 1, room.getRow());
-        final Room north = getRoom(room.getCol(), room.getRow() - 1);
-        final Room south = getRoom(room.getCol(), room.getRow() + 1);
-        
+        if (isHexagon()) {
+
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+            checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
+            checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
+            checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
+            checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
+
+        } else {
+
+            checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
+            checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
+            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
+            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
+        }
+
         //clear the list
         tmp.clear();
-        
+
         //add any rooms that have not been visited to our list
-        if (east != null && !east.hasVisited())
-            tmp.add(east);
-        if (west != null && !west.hasVisited())
-            tmp.add(west);
-        if (north != null && !north.hasVisited())
-            tmp.add(north);
-        if (south != null && !south.hasVisited())
-            tmp.add(south);
-        
+        for (int i = 0; i < checking.size(); i++) {
+
+            Room tmp1 = checking.get(i);
+
+            if (tmp1 != null && !tmp1.hasVisited())
+                tmp.add(tmp1);
+        }
+
         //if there are no unvisited neighbors
         if (tmp.isEmpty())
         {
@@ -111,7 +128,7 @@ public class GrowingTree extends Maze
             final Room randomRoom = tmp.get(random.nextInt(tmp.size()));
             
             //join the rooms
-            MazeHelper.joinRooms(room, randomRoom);
+            MazeHelper.joinRooms(isHexagon(), room, randomRoom);
             
             //mark the rooms as visited
             room.setVisited(true);

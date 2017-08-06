@@ -22,17 +22,21 @@ public class HuntKill extends Maze
     
     //have we hit a dead end
     private boolean deadend = false;
-    
-    public HuntKill(final int cols, final int rows) throws Exception
+
+    //list of rooms for us to check on
+    private List<Room> checking;
+
+    public HuntKill(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //fill all walls
         super.populateRooms();
         
         //create a new list
-        this.options = new ArrayList<Room>();
-    }        
+        this.options = new ArrayList<>();
+        this.checking = new ArrayList<>();
+    }
     
     @Override
     public void dispose()
@@ -80,25 +84,34 @@ public class HuntKill extends Maze
                     //we are only interested in rooms that haven't been visited
                     if (room.hasVisited())
                         continue;
+
+                    checking.clear();
+
+                    //check neighbors
+                    if (isHexagon()) {
+                        checking.add(getRoom(col, row - 1));    //north
+                        checking.add(getRoom(col, row + 1));    //south
+                        checking.add(getRoom(col + 1, row - 1));//north east
+                        checking.add(getRoom(col + 1, row + 1));//south east
+                        checking.add(getRoom(col - 1, row - 1));//north west
+                        checking.add(getRoom(col - 1, row + 1));//south west
+                    } else {
+                        checking.add(getRoom(col + 1, row));    //east
+                        checking.add(getRoom(col - 1, row));    //west
+                        checking.add(getRoom(col, row - 1));    //north
+                        checking.add(getRoom(col, row + 1));    //south
+                    }
                     
                     //clear the list of objects
                     options.clear();
-                    
-                    //check for visited cells
-                    final Room east = getRoom(col + 1, row);
-                    final Room west = getRoom(col - 1, row);
-                    final Room north = getRoom(col, row - 1);
-                    final Room south = getRoom(col, row + 1);
 
-                    //make sure room exists and is already visited
-                    if (east != null && east.hasVisited())
-                        options.add(east);
-                    if (west != null && west.hasVisited())
-                        options.add(west);
-                    if (north != null && north.hasVisited())
-                        options.add(north);
-                    if (south != null && south.hasVisited())
-                        options.add(south);
+                    for (int i = 0; i < checking.size(); i++) {
+
+                        Room tmp = checking.get(i);
+
+                        if (tmp != null && tmp.hasVisited())
+                            options.add(tmp);
+                    }
 
                     //we only want to join a unvisited room to a visited room
                     if (!options.isEmpty())
@@ -123,23 +136,32 @@ public class HuntKill extends Maze
                 }
             }
         }
-        
-        //the rooms in each direction
-        final Room east = getRoom(currentCol + 1, currentRow);
-        final Room west = getRoom(currentCol - 1, currentRow);
-        final Room north = getRoom(currentCol, currentRow - 1);
-        final Room south = getRoom(currentCol, currentRow + 1);
-        
+
+        checking.clear();
+
+        //check neighbors
+        if (isHexagon()) {
+            checking.add(getRoom(currentCol, currentRow - 1));    //north
+            checking.add(getRoom(currentCol, currentRow + 1));    //south
+            checking.add(getRoom(currentCol + 1, currentRow - 1));//north east
+            checking.add(getRoom(currentCol + 1, currentRow + 1));//south east
+            checking.add(getRoom(currentCol - 1, currentRow - 1));//north west
+            checking.add(getRoom(currentCol - 1, currentRow + 1));//south west
+        } else {
+            checking.add(getRoom(currentCol + 1, currentRow));    //east
+            checking.add(getRoom(currentCol - 1, currentRow));    //west
+            checking.add(getRoom(currentCol, currentRow - 1));    //north
+            checking.add(getRoom(currentCol, currentRow + 1));    //south
+        }
+
         //if the rooms exist and have not visited, add it to the list
-        if (east != null && !east.hasVisited())
-            options.add(east);
-        if (west != null && !west.hasVisited())
-            options.add(west);
-        if (north != null && !north.hasVisited())
-            options.add(north);
-        if (south != null && !south.hasVisited())
-            options.add(south);
-        
+        for (int i = 0; i < checking.size(); i++) {
+            Room tmp = checking.get(i);
+
+            if (tmp != null && !tmp.hasVisited())
+                options.add(tmp);
+        }
+
         //if we have options to choose from
         if (!options.isEmpty())
         {
@@ -171,7 +193,7 @@ public class HuntKill extends Maze
         neighbor.setVisited(true);
 
         //join the rooms to create the path
-        MazeHelper.joinRooms(room, neighbor);
+        MazeHelper.joinRooms(isHexagon(), room, neighbor);
 
         //now set the new position
         currentCol = neighbor.getCol();

@@ -20,9 +20,9 @@ public class Sidewinder extends Maze
     //the current location
     private int currentCol, currentRow;
     
-    public Sidewinder(final int cols, final int rows) throws Exception
+    public Sidewinder(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //fill all walls
         super.populateRooms();
@@ -118,7 +118,7 @@ public class Sidewinder extends Maze
         east.setVisited(true);
 
         //join the rooms
-        MazeHelper.joinRooms(room, east);
+        MazeHelper.joinRooms(isHexagon(), room, east);
     }
     
     /**
@@ -145,7 +145,7 @@ public class Sidewinder extends Maze
             north.setVisited(true);
 
             //join the rooms
-            MazeHelper.joinRooms(room, north);
+            MazeHelper.joinRooms(isHexagon(), room, north);
         }
     }
 }

@@ -34,19 +34,23 @@ public class AldousBroder extends Maze
     
     //temporary object used to generate maze
     private List<Room> options;
-    
-    public AldousBroder(final int cols, final int rows) throws Exception
+
+    //list of rooms for us to check on
+    private List<Room> checking;
+
+    public AldousBroder(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
-        //set 4 walls for each room
+        //add walls to each room
         super.populateRooms();
         
         //the limit will be determined by the size of the maze
         this.failedAttemptsLimit = ((cols * rows) / 2);
         
-        //create new list
-        this.options = new ArrayList<Room>();
+        //create new list(s)
+        this.options = new ArrayList<>();
+        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -80,13 +84,25 @@ public class AldousBroder extends Maze
         
         //our temporary room
         Room room = getRoom(col, row);
-        
-        //check in each direction
-        final Room west = getRoom(col - 1, row);
-        final Room east = getRoom(col + 1, row);
-        final Room north = getRoom(col, row - 1);
-        final Room south = getRoom(col, row + 1);
-        
+
+        //clear the list
+        checking.clear();
+
+        //check in each possible direction
+        if (isHexagon()) {
+            checking.add(getRoom(col, row - 1));    //north
+            checking.add(getRoom(col, row + 1));    //south
+            checking.add(getRoom(col - 1, row - 1));//north west
+            checking.add(getRoom(col + 1, row - 1));//north east
+            checking.add(getRoom(col - 1, row + 1));//south west
+            checking.add(getRoom(col + 1, row + 1));//south east
+        } else {
+            checking.add(getRoom(col - 1, row));    //east
+            checking.add(getRoom(col + 1, row));    //west
+            checking.add(getRoom(col, row - 1));    //north
+            checking.add(getRoom(col, row + 1));    //south
+        }
+
         //make sure the list is empty
         options.clear();
         
@@ -98,14 +114,14 @@ public class AldousBroder extends Maze
          */
         if (getProgress().getProgress() >= LOCATE_TARGET_PROGRESS_RATIO || count > failedAttemptsLimit)
         {
-            if (west != null && !west.hasVisited())
-                options.add(west);
-            if (east != null && !east.hasVisited())
-                options.add(east);
-            if (north != null && !north.hasVisited())
-                options.add(north);
-            if (south != null && !south.hasVisited())
-                options.add(south);
+            //check every room in  our list
+            for (int i = 0; i < checking.size(); i++) {
+
+                Room tmp = checking.get(i);
+
+                if (tmp != null && !tmp.hasVisited())
+                    options.add(tmp);
+            }
         }
         
         //if we still don't have any options
@@ -113,16 +129,12 @@ public class AldousBroder extends Maze
         {
             //increase the count
             count++;
-            
-            //add any existing neighbor
-            if (west != null)
-                options.add(west);
-            if (east != null)
-                options.add(east);
-            if (north != null)
-                options.add(north);
-            if (south != null)
-                options.add(south);
+
+            //add all existing neighbor(s)
+            for (int i = 0; i < checking.size(); i++) {
+                if (checking.get(i) != null)
+                    options.add(checking.get(i));
+            }
         }
         
         //now pick a random room
@@ -143,7 +155,7 @@ public class AldousBroder extends Maze
             tmp.setVisited(true);
             
             //join the rooms
-            MazeHelper.joinRooms(room, tmp);
+            MazeHelper.joinRooms(isHexagon(), room, tmp);
         }
         else
         {
@@ -177,20 +189,31 @@ public class AldousBroder extends Maze
                 //if this room has not been visited
                 if (!getRoom(col1, row1).hasVisited())
                 {
-                    //check each direction
-                    final Room west = getRoom(col1 - 1, row1);
-                    final Room east = getRoom(col1 + 1, row1);
-                    final Room north = getRoom(col1, row1 - 1);
-                    final Room south = getRoom(col1, row1 + 1);
-                    
-                    if (west != null && west.hasVisited())
-                        options.add(west);
-                    if (east != null && east.hasVisited())
-                        options.add(east);
-                    if (north != null && north.hasVisited())
-                        options.add(north);
-                    if (south != null && south.hasVisited())
-                        options.add(south);
+                    //clear the list
+                    checking.clear();
+
+                    //check in each possible direction
+                    if (isHexagon()) {
+                        checking.add(getRoom(col, row - 1));    //north
+                        checking.add(getRoom(col, row + 1));    //south
+                        checking.add(getRoom(col - 1, row - 1));//north west
+                        checking.add(getRoom(col + 1, row - 1));//north east
+                        checking.add(getRoom(col - 1, row + 1));//south west
+                        checking.add(getRoom(col + 1, row + 1));//south east
+                    } else {
+                        checking.add(getRoom(col - 1, row));    //east
+                        checking.add(getRoom(col + 1, row));    //west
+                        checking.add(getRoom(col, row - 1));    //north
+                        checking.add(getRoom(col, row + 1));    //south
+                    }
+
+                    for (int i = 0; i < checking.size(); i++) {
+
+                        Room tmp = checking.get(i);
+
+                        if (tmp != null && tmp.hasVisited())
+                            options.add(tmp);
+                    }
                 }
             }
         }

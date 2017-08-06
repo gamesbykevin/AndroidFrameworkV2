@@ -15,11 +15,11 @@ public class Ellers extends Maze
     //our current location
     private int col = 0, row = 0;
     
-    public Ellers(final int cols, final int rows) throws Exception
+    public Ellers(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
-        //set 4 walls for each room
+        //set the walls for each room
         super.populateRooms();
     }
     
@@ -122,7 +122,7 @@ public class Ellers extends Maze
             roomEast.setId(roomWest);
 
             //now remove the walls between the neighbors
-            MazeHelper.joinRooms(roomWest, roomEast);
+            MazeHelper.joinRooms(isHexagon(), roomWest, roomEast);
         }
     }
     
@@ -137,7 +137,7 @@ public class Ellers extends Maze
         roomSouth.setId(roomNorth);
 
         //now remove the walls between the neighbors
-        MazeHelper.joinRooms(roomSouth, roomNorth);
+        MazeHelper.joinRooms(isHexagon(), roomSouth, roomNorth);
     }
     
     /**

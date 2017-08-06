@@ -1,9 +1,5 @@
 package com.gamesbykevin.androidframeworkv2.maze;
 
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-
 import com.gamesbykevin.androidframeworkv2.base.Cell;
 import com.gamesbykevin.androidframeworkv2.util.Progress;
 
@@ -38,21 +34,25 @@ public abstract class Maze implements IMaze
     
     //default maze size
     protected static final int DEFAULT_MAZE_DIMENSION = 10;
-    
+
+    //is each room in  the maze a hexagon?
+    private final boolean hexagon;
+
     //the start location to render the 2d maze, and the room dimension
     private int x = 0, y = 0, d = 32;
     
-    //object used to render the 2d maze
-    private Paint paint;
-    
     /**
      * Create a new maze of specified size
+     * @param hexagon Is each room in the maze a hexagon? if false we assume square
      * @param cols Total columns
      * @param rows Total rows
      * @throws Exception If the minimum required dimensions is not provided
      */
-    protected Maze(final int cols, final int rows) throws Exception
+    protected Maze(boolean hexagon, final int cols, final int rows) throws Exception
     {
+        //assign the shape of room
+        this.hexagon = hexagon;
+
         if (cols < 2)
             throw new Exception("The maze must contain at least 2 columns");
         if (rows < 2)
@@ -74,6 +74,14 @@ public abstract class Maze implements IMaze
         //create the start/finish locations
         this.start = new Cell();
         this.finish = new Cell();
+    }
+
+    /**
+     * Is the maze a hexagon?
+     * @return true if every room is shaped like a hexagon, false otherwise
+     */
+    public boolean isHexagon() {
+        return this.hexagon;
     }
     
     /**
@@ -197,7 +205,7 @@ public abstract class Maze implements IMaze
     }
     
     /**
-     * Fill each room with 4 walls
+     * Fill each room with walls accordingly
      */
     protected void populateRooms()
     {
@@ -209,7 +217,7 @@ public abstract class Maze implements IMaze
                 
                 //make sure the room exists
                 if (room != null)
-                    getRoom(col, row).addAllWalls();
+                    getRoom(col, row).addAllWalls(isHexagon());
             }
         }
     }
@@ -242,8 +250,6 @@ public abstract class Maze implements IMaze
             
             this.rooms = null;
         }
-        
-        this.paint = null;
     }
     
     /**

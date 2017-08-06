@@ -24,7 +24,8 @@ public class Room implements Disposable
      */
     public enum Wall
     {
-        North, South, West, East
+        North, South, West, East,
+        NorthWest, NorthEast, SouthEast, SouthWest
     }
     
     /**
@@ -174,13 +175,29 @@ public class Room implements Disposable
     }
     
     /**
-     * Add all possible walls to the list
+     * Add all possible walls to the list.<br>
+     * Hexagons have 6 walls, while Squares have 4
+     * @param hexagon Is the room a hexagon shape?
      */
-    public void addAllWalls()
+    public void addAllWalls(boolean hexagon)
     {
-        for (Wall wall : Wall.values())
-        {
-            addWall(wall);
+        if (hexagon) {
+
+            //hexagons we have 6 walls
+            addWall(Wall.NorthWest);
+            addWall(Wall.North);
+            addWall(Wall.NorthEast);
+            addWall(Wall.SouthEast);
+            addWall(Wall.South);
+            addWall(Wall.SouthWest);
+
+        } else {
+
+            //squares only have 4 walls
+            addWall(Wall.North);
+            addWall(Wall.South);
+            addWall(Wall.West);
+            addWall(Wall.East);
         }
     }
     

@@ -21,7 +21,7 @@ public class BinaryTree extends Maze
     private List<Room> tmp;
     
     /**
-     * The different directions we can use to create passages/
+     * The different directions we can use to create passages
      */
     private enum Directions
     {
@@ -31,9 +31,9 @@ public class BinaryTree extends Maze
     //the direction we will use
     private Directions direction;
     
-    public BinaryTree(final int cols, final int rows) throws Exception
+    public BinaryTree(final boolean hexagon, final int cols, final int rows) throws Exception
     {
-        super(cols, rows);
+        super(hexagon, cols, rows);
         
         //fill all walls
         super.populateRooms();
@@ -115,7 +115,7 @@ public class BinaryTree extends Maze
             final Room room = getRoom(col, row);
 
             //now join the current room to a random room from the list
-            MazeHelper.joinRooms(room, tmp.get(random.nextInt(tmp.size())));
+            MazeHelper.joinRooms(isHexagon(), room, tmp.get(random.nextInt(tmp.size())));
         }
         
         //move to the next column
