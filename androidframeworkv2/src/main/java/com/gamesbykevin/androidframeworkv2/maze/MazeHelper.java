@@ -114,6 +114,7 @@ public class MazeHelper
                     room2.removeWall(Room.Wall.West);
                 }
             } else {
+
                 //they are vertical neighbors
                 if (room1.getRow() > room2.getRow()) {
                     room1.removeWall(Room.Wall.North);
@@ -143,7 +144,7 @@ public class MazeHelper
         }
         
         //create empty list of optional walls
-        List<Room> options = new ArrayList<Room>();
+        List<Room> options = new ArrayList<>();
         
         //get the room at the starting point 
         Room room = maze.getRoom(maze.getStartCol(), maze.getStartRow());
@@ -163,21 +164,8 @@ public class MazeHelper
             //flag the current room as visited
             room.setVisited(true);
 
-            //check all walls
-            for (Room.Wall wall : Room.getAllWalls(maze.isHexagon())) {
-
-                //get the neighbor room
-                Room neighbor = maze.getRoomNeighbor(room, wall);
-
-
-                ss;
-            }
-
-
-            for (int i = 0; i < Room.getAllWalls(maze.isHexagon()).size(); i++) {
-                Wall wall = Room.getAllWalls(maze.isHexagon()).get(i);
-
-                //check if the room in the specified direction can be added to the options list
+            //check if the room in the specified direction can be added to the options list
+            for (Wall wall : Room.getAllWalls(maze.isHexagon())) {
                 performRoomCheck(maze, room, wall, options);
             }
 
@@ -197,22 +185,22 @@ public class MazeHelper
     private static void performRoomCheck(final Maze maze, final Room current, final Room.Wall direction, final List<Room> options) throws Exception
     {
         //get the neighbor room
-        Room room = maze.getRoom(current.getCol() + direction.getCol(), current.getRow() + direction.getRow());
+        Room neighbor = maze.getRoomNeighbor(current, direction);
 
         //make sure room exists and we haven't already visited
-        if (room != null && !room.hasVisited())
+        if (neighbor != null && !neighbor.hasVisited())
         {
             //if there isn't a wall blocking the current room
             if (!current.hasWall(direction))
             {
                 //assign the cost
-                room.setCost(current.getCost() + 1);
+                neighbor.setCost(current.getCost() + 1);
                 
                 //mark if as visited
-                room.setVisited(true);
+                neighbor.setVisited(true);
                 
                 //add it to our list of rooms to check
-                options.add(room);
+                options.add(neighbor);
             }
         }
     }

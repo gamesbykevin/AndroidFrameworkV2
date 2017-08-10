@@ -1,37 +1,34 @@
 package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
+import android.util.Log;
+
 import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Random;
-
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.COLS;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.HEXAGON;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.RANDOM;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.ROWS;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by Kevin on 8/5/2017.
  */
-
-public class KruskalsTest extends Kruskals {
-
-    public KruskalsTest() throws Exception {
-        super(HEXAGON, COLS, ROWS);
-
-        //flag debug true
-        UtilityHelper.DEBUG = true;
-    }
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Log.class})
+public class KruskalsTest extends MazeTest {
 
     @Test
-    public void generate() {
-        try {
+    public void generate() throws Exception {
+
+        PowerMockito.mockStatic(Log.class);
+
+        for (MazeTest.Scenario scenario : MazeTest.Scenario.values()) {
 
             //create our maze
-            KruskalsTest maze = new KruskalsTest();
+            Kruskals maze = new Kruskals(scenario.isHexagon(), scenario.getCols(), scenario.getRows());
 
             //keep generating until finished
             while (!maze.isGenerated()) {
@@ -47,9 +44,6 @@ public class KruskalsTest extends Kruskals {
 
             //assume maze is generated
             assertTrue(maze.isGenerated());
-
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
         }
     }
 }

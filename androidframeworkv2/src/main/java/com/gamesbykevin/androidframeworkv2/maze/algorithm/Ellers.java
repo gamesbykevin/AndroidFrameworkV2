@@ -81,7 +81,7 @@ public class Ellers extends Maze
                 if (random.nextBoolean())
                 {
                     //create the vertical path
-                    createVerticalPath(getRoom(col, row), getRoom(col, row + 1));
+                    createVerticalPath(getRoom(col, row), random);
                 }
             }
 
@@ -92,7 +92,7 @@ public class Ellers extends Maze
                 if (!hasSet(getRoom(col, row), row + 1))
                 {
                     //create the vertical path
-                    createVerticalPath(getRoom(col, row), getRoom(col, row + 1));
+                    createVerticalPath(getRoom(col, row), random);
                 }
             }
         }
@@ -127,12 +127,33 @@ public class Ellers extends Maze
     }
     
     /**
-     * Create a vertical path joining the 2 rooms.<br>
+     * Create a vertical path joining the north room and a room to the south.<br>
      * @param roomNorth Room to the north
-     * @param roomSouth The neighbor room to the south
+     * @param random Object used to make random decisions
      */
-    private void createVerticalPath(final Room roomNorth, final Room roomSouth) throws Exception
+    private void createVerticalPath(final Room roomNorth, final Random random) throws Exception
     {
+        //a room below the current north room
+        Room roomSouth;
+
+        if (isHexagon()) {
+
+            Room room1 = getRoomNeighbor(roomNorth, Room.Wall.SouthWest);
+            Room room2 = getRoomNeighbor(roomNorth, Room.Wall.SouthEast);
+
+            if (room1 != null && room2 == null) {
+                roomSouth = room1;
+            } else if (room1 == null && room2 != null) {
+                roomSouth = room2;
+            } else {
+                roomSouth = random.nextBoolean() ? room1 : room2;
+            }
+
+        } else {
+
+            roomSouth = getRoom(roomNorth.getCol(), roomNorth.getRow() + 1);
+        }
+
         //make the neighbor part of the same set
         roomSouth.setId(roomNorth);
 

@@ -68,11 +68,13 @@ public class RecursiveBacktracking extends Maze
         //create empty list of optional walls
         List<Wall> options = new ArrayList<Wall>();
 
-        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-            Wall wall = Room.getAllWalls(isHexagon()).get(i);
+        for (Wall wall : Room.getAllWalls(isHexagon())) {
+
+            //get the neighbor
+            Room neighbor = getRoomNeighbor(col, row, wall);
 
             //check the wall direction, make sure we are inbounds and have not visited our neighbor
-            if (hasBounds(col + wall.getCol(), row + wall.getRow()) && !getRoom(col + wall.getCol(), row + wall.getRow()).hasVisited())
+            if (neighbor != null && !neighbor.hasVisited())
                 options.add(wall);
         }
 
@@ -97,46 +99,49 @@ public class RecursiveBacktracking extends Maze
             //mark this as visited
             getRoom(col, row).setVisited(true);
 
-            //update new location based on wall direction
-            row = row + wall.getRow();
-            col = col + wall.getCol();
+            //get the neighbor
+            Room neighbor = getRoomNeighbor(col, row, wall);
 
-            //mark this as visited
-            getRoom(col, row).setVisited(true);
+            //update new location based on neighbor
+            row = neighbor.getRow();
+            col = neighbor.getCol();
+
+            //mark the neighbor
+            neighbor.setVisited(true);
 
             //remove the wall from our neighbor accordingly
             switch (wall)
             {
                 case NorthWest:
-                    getRoom(col, row).removeWall(Wall.SouthEast);
+                    neighbor.removeWall(Wall.SouthEast);
                     break;
 
                 case NorthEast:
-                    getRoom(col, row).removeWall(Wall.SouthWest);
+                    neighbor.removeWall(Wall.SouthWest);
                     break;
 
                 case SouthWest:
-                    getRoom(col, row).removeWall(Wall.NorthEast);
+                    neighbor.removeWall(Wall.NorthEast);
                     break;
 
                 case SouthEast:
-                    getRoom(col, row).removeWall(Wall.NorthWest);
+                    neighbor.removeWall(Wall.NorthWest);
                     break;
 
                 case North:
-                    getRoom(col, row).removeWall(Wall.South);
+                    neighbor.removeWall(Wall.South);
                     break;
 
                 case South:
-                    getRoom(col, row).removeWall(Wall.North);
+                    neighbor.removeWall(Wall.North);
                     break;
 
                 case West:
-                    getRoom(col, row).removeWall(Wall.East);
+                    neighbor.removeWall(Wall.East);
                     break;
 
                 case East:
-                    getRoom(col, row).removeWall(Wall.West);
+                    neighbor.removeWall(Wall.West);
                     break;
 
                 default:

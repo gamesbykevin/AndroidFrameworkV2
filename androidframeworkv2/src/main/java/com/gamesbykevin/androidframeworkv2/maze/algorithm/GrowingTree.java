@@ -84,10 +84,8 @@ public class GrowingTree extends Maze
         tmp.clear();
 
         //check neighbors
-        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-            Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
-
-            Room roomTmp = getRoom(room.getCol() + wall.getCol(), room.getRow() + wall.getRow());
+        for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
+            Room roomTmp = getRoomNeighbor(room, wall);
 
             //add any rooms that have not been visited to our list
             if (roomTmp != null && !roomTmp.hasVisited())

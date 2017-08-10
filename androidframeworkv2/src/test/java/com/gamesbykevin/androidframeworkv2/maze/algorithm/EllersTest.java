@@ -1,38 +1,34 @@
 package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
+import android.util.Log;
+
 import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Random;
-
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.COLS;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.HEXAGON;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.RANDOM;
-import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.ROWS;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 /**
  * Created by Kevin on 8/5/2017.
  */
-
-public class EllersTest extends Ellers {
-
-    public EllersTest() throws Exception {
-        super(HEXAGON, COLS, ROWS);
-
-        //flag debug true
-        UtilityHelper.DEBUG = true;
-    }
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Log.class})
+public class EllersTest extends MazeTest {
 
     @Test
-    public void generate() {
+    public void generate() throws Exception {
 
-        try {
+        PowerMockito.mockStatic(Log.class);
+
+        for (MazeTest.Scenario scenario : MazeTest.Scenario.values()) {
 
             //create our maze
-            EllersTest maze = new EllersTest();
+            Ellers maze = new Ellers(scenario.isHexagon(), scenario.getCols(), scenario.getRows());
 
             //keep generating until finished
             while (!maze.isGenerated()) {
@@ -48,9 +44,6 @@ public class EllersTest extends Ellers {
 
             //assume maze is generated
             assertTrue(maze.isGenerated());
-
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
         }
     }
 }

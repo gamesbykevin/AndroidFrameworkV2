@@ -108,7 +108,7 @@ public class Wilsons extends Maze
         
         /**
          * If the number of attempts has exceeded half the size of the maze we will locate the closest visited room.
-         * This is to help shorted the time of maze creation.
+         * This is to help shorten the time of maze creation.
          */
         if (count >= (getCols() * getRows()) / 2)
         {
@@ -119,9 +119,13 @@ public class Wilsons extends Maze
         //if the list is empty, locate optional directions
         if (tmp.isEmpty())
         {
-            for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-                Wall wall = Room.getAllWalls(isHexagon()).get(i);
-                if (hasBounds(col + wall.getCol(), row + wall.getRow()))
+            for (Wall wall : Room.getAllWalls(isHexagon())) {
+
+                //get the neighbor
+                Room neighbor = getRoomNeighbor(col, row, wall);
+
+                //if the neighbor exists, add to list
+                if (neighbor != null)
                     tmp.add(wall);
             }
         }
@@ -131,10 +135,13 @@ public class Wilsons extends Maze
         
         //add direction to list
         directions.add(new Target(direction, col, row));
-        
-        //update the location based on our random direction
-        col = (col + direction.getCol());
-        row = (row + direction.getRow());
+
+        //get the neighbor
+        Room neighbor = getRoomNeighbor(col, row, direction);
+
+        //update the location based on our random direction neighbor
+        col = neighbor.getCol();
+        row = neighbor.getRow();
 
         /**
          * If this room was visited (a.k.a. part of the maze)<br>
@@ -150,14 +157,14 @@ public class Wilsons extends Maze
                 
                 //next room
                 Room room2 = null;
-                
+
                 //get the target at this specific location to determine the next move
                 for (int index = directions.size() - 1; index >= 0; index--)
                 {
                     if (directions.get(index).hasTarget(room1))
                     {
                         //get the next room in our steps
-                        room2 = getRoom(startCol + directions.get(index).direction.getCol(), startRow + directions.get(index).direction.getRow());
+                        room2 = getRoomNeighbor(startCol, startRow, directions.get(index).direction);
 
                         //now remove this target
                         directions.remove(index);
@@ -239,49 +246,98 @@ public class Wilsons extends Maze
              * Compare the room to the current location. 
              * So we know which direction to head in
              */
-            for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-                Wall wall = Room.getAllWalls(isHexagon()).get(i);
+            for (Wall wall : Room.getAllWalls(isHexagon())) {
 
                 switch (wall) {
 
                     case North:
+
                         if (room.getRow() < row)
                             tmp.add(wall);
                         break;
 
                     case South:
+
                         if (room.getRow() > row)
                             tmp.add(wall);
                         break;
 
                     case West:
-                        if (room.getCol() < col)
-                            tmp.add(wall);
+
+                        if (isHexagon()) {
+                            if (room.getCol() < col && room.getRow() == row)
+                                tmp.add(wall);
+                        } else {
+                            if (room.getCol() < col)
+                                tmp.add(wall);
+                        }
                         break;
 
                     case East:
-                        if (room.getCol() > col)
-                            tmp.add(wall);
+
+                        if (isHexagon()) {
+                            if (room.getCol() > col && room.getRow() == row)
+                                tmp.add(wall);
+                        } else {
+                            if (room.getCol() > col)
+                                tmp.add(wall);
+                        }
                         break;
 
                     case NorthWest:
-                        if (room.getRow() < row && room.getCol() < col)
-                            tmp.add(wall);
+
+                        //if the winning room is above us
+                        if (room.getRow() < row) {
+                            if (room.getRow() % 2 == 0) {
+                                if (room.getCol() < col)
+                                    tmp.add(wall);
+                            } else {
+                                if (room.getCol() == col)
+                                    tmp.add(wall);
+                            }
+                        }
                         break;
 
                     case NorthEast:
-                        if (room.getRow() < row && room.getCol() > col)
-                            tmp.add(wall);
+
+                        //if the winning room is above us
+                        if (room.getRow() < row) {
+                            if (room.getRow() % 2 == 0) {
+                                if (room.getCol() == col)
+                                    tmp.add(wall);
+                            } else {
+                                if (room.getCol() > col)
+                                    tmp.add(wall);
+                            }
+                        }
                         break;
 
                     case SouthWest:
-                        if (room.getRow() > row && room.getCol() < col)
-                            tmp.add(wall);
+
+                        //if the winning room is below us
+                        if (room.getRow() > row) {
+                            if (room.getRow() % 2 == 0) {
+                                if (room.getCol() < col)
+                                    tmp.add(wall);
+                            } else {
+                                if (room.getCol() == col)
+                                    tmp.add(wall);
+                            }
+                        }
                         break;
 
                     case SouthEast:
-                        if (room.getRow() > row && room.getCol() > col)
-                            tmp.add(wall);
+
+                        //if the winning room is below us
+                        if (room.getRow() > row) {
+                            if (room.getRow() % 2 == 0) {
+                                if (room.getCol() == col)
+                                    tmp.add(wall);
+                            } else {
+                                if (room.getCol() > col)
+                                    tmp.add(wall);
+                            }
+                        }
                         break;
 
                     default:

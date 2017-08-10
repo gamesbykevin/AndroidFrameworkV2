@@ -30,13 +30,13 @@ public class AldousBroder extends Maze
      * It will become more difficult to locate an unvisited room.<br>
      * This will help speed up the process.
      */
-    private static final float LOCATE_TARGET_PROGRESS_RATIO = .8f;
+    private static final float LOCATE_TARGET_PROGRESS_RATIO = .7f;
     
     //temporary object used to generate maze
     private List<Room> options;
 
-    public AldousBroder(final boolean hexagon, final int cols, final int rows) throws Exception
-    {
+    public AldousBroder(final boolean hexagon, final int cols, final int rows) throws Exception {
+
         super(hexagon, cols, rows);
         
         //add walls to each room
@@ -50,8 +50,7 @@ public class AldousBroder extends Maze
     }
     
     @Override
-    public void dispose()
-    {
+    public void dispose() {
         super.dispose();
         
         options.clear();
@@ -64,15 +63,13 @@ public class AldousBroder extends Maze
      * @throws Exception
      */
     @Override
-    public void update(final Random random) throws Exception
-    {
+    public void update(final Random random) throws Exception {
         //if generated no need to continue
         if (isGenerated())
             return;
         
         //if we haven't visited any rooms, this is the first time
-        if (!MazeHelper.hasVisited(this))
-        {
+        if (!MazeHelper.hasVisited(this)) {
             //pick a random location
             col = random.nextInt(getCols());
             row = random.nextInt(getRows());

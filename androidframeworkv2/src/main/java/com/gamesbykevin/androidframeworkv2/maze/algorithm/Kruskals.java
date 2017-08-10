@@ -43,11 +43,10 @@ public class Kruskals extends Maze
         List<Room.Wall> directions = new ArrayList<>();
 
         //check all neighbors
-        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-            Wall wall = Room.getAllWalls(isHexagon()).get(i);
+        for (Wall wall : Room.getAllWalls(isHexagon())) {
 
             //get the neighbor room
-            Room tmp = getRoom(room.getCol() + wall.getCol(), room.getRow() + wall.getRow());
+            Room tmp = getRoomNeighbor(room, wall);
 
             //if the room exists and is not part of the same set
             if (tmp != null && !tmp.hasId(room))
@@ -172,13 +171,10 @@ public class Kruskals extends Maze
         int count = 0;
 
         //check all neighbors
-        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+        for (Wall wall : Room.getAllWalls(isHexagon())) {
 
-            //get the current wall
-            Wall wall = Room.getAllWalls(isHexagon()).get(i);
-
-            //offset the direction to get the room
-            Room tmp = getRoom(room.getCol() + wall.getCol(), room.getRow() + wall.getRow());
+            //get the neighbor
+            Room tmp = getRoomNeighbor(room, wall);
 
             //if the room exists and is not part of the same set
             if (tmp != null && !tmp.hasId(room))
@@ -221,60 +217,12 @@ public class Kruskals extends Maze
      */
     private void joinRooms(final Room room, final Wall direction) throws Exception
     {
-        switch (direction)
-        {
-            case NorthEast:
-                //remove the appropriate walls
-                room.removeWall(Wall.NorthEast);
-                getRoom(room.getCol() + 1, room.getRow() - 1).removeWall(Wall.SouthWest);
-                break;
+        //get the neighbor
+        Room neighbor = getRoomNeighbor(room, direction);
 
-            case NorthWest:
-                //remove the appropriate walls
-                room.removeWall(Wall.NorthWest);
-                getRoom(room.getCol() - 1, room.getRow() - 1).removeWall(Wall.SouthEast);
-                break;
+        //join the rooms together removing the walls
+        MazeHelper.joinRooms(isHexagon(), room, neighbor);
 
-            case SouthEast:
-                //remove the appropriate walls
-                room.removeWall(Wall.SouthEast);
-                getRoom(room.getCol() + 1, room.getRow() + 1).removeWall(Wall.NorthWest);
-                break;
-
-            case SouthWest:
-                //remove the appropriate walls
-                room.removeWall(Wall.SouthWest);
-                getRoom(room.getCol() - 1, room.getRow() + 1).removeWall(Wall.NorthEast);
-                break;
-
-            case East:
-                //remove the appropriate walls
-                room.removeWall(Wall.East);
-                getRoom(room.getCol() + 1, room.getRow()).removeWall(Wall.West);
-                break;
-                
-            case West:
-                //remove the appropriate walls
-                room.removeWall(Wall.West);
-                getRoom(room.getCol() - 1, room.getRow()).removeWall(Wall.East);
-                break;
-                
-            case North:
-                //remove the appropriate walls
-                room.removeWall(Wall.North);
-                getRoom(room.getCol(), room.getRow() - 1).removeWall(Wall.South);
-                break;
-                
-            case South:
-                //remove the appropriate walls
-                room.removeWall(Wall.South);
-                getRoom(room.getCol(), room.getRow() + 1).removeWall(Wall.North);
-                break;
-                
-            default:
-                throw new Exception("Direction not handled here " + direction.toString());
-        }
-        
         //now update the neighboring rooms that we can access to have the same set
         joinSets(room);
     }
@@ -307,12 +255,15 @@ public class Kruskals extends Maze
             //mark as visited
             tmp.setVisited(true);
 
-            for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-                Wall wall = Room.getAllWalls(isHexagon()).get(i);
+            //check all neighbors
+            for (Wall wall : Room.getAllWalls(isHexagon())) {
+
+                //get the neighbor
+                Room neighbor = getRoomNeighbor(tmp, wall);
 
                 //if there is no wall and the neighboring room has not been visited yet
-                if (!tmp.hasWall(wall) && !getRoom(tmp.getCol() + wall.getCol(), tmp.getRow() + wall.getRow()).hasVisited())
-                    rooms.add(getRoom(tmp.getCol() + wall.getCol(), tmp.getRow() + wall.getRow()));
+                if (!tmp.hasWall(wall) && !neighbor.hasVisited())
+                    rooms.add(neighbor);
             }
 
             //remove room from list

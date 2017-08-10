@@ -85,11 +85,10 @@ public class HuntKill extends Maze
                     options.clear();
 
                     //check all neighbors
-                    for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-                        Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
+                    for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
 
                         //get the neighbor room
-                        Room tmp = getRoom(col + wall.getCol(), row + wall.getRow());
+                        Room tmp = getRoomNeighbor(col, row, wall);
 
                         if (tmp != null && tmp.hasVisited())
                             options.add(tmp);
@@ -120,11 +119,10 @@ public class HuntKill extends Maze
         }
 
         //check all neighbors
-        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
-            Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
+        for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
 
             //get the neighbor room
-            Room tmp = getRoom(currentCol + wall.getCol(), currentRow + wall.getRow());
+            Room tmp = getRoomNeighbor(currentCol, currentRow, wall);
 
             //if the rooms exist and have not visited, add it to the list
             if (tmp != null && !tmp.hasVisited())

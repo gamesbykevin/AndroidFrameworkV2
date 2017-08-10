@@ -4,8 +4,6 @@ import com.gamesbykevin.androidframeworkv2.maze.Maze;
 import com.gamesbykevin.androidframeworkv2.maze.MazeHelper;
 import com.gamesbykevin.androidframeworkv2.maze.Room;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -17,11 +15,9 @@ public class BinaryTree extends Maze
     //our current location
     private int col = 0, row = 0;
     
-    //list of rooms
-    private List<Room> tmp;
-    
     /**
-     * The different directions we can use to create passages
+     * The different directions we can use to create passages.<br>
+     * We will choose one randomly and use that for the entire maze generation
      */
     private enum Directions
     {
@@ -37,18 +33,12 @@ public class BinaryTree extends Maze
         
         //fill all walls
         super.populateRooms();
-        
-        //create a new list
-        this.tmp = new ArrayList<Room>();
     }
     
     @Override
     public void dispose()
     {
         super.dispose();
-        
-        tmp.clear();
-        tmp = null;
     }
     
     /**
@@ -62,62 +52,71 @@ public class BinaryTree extends Maze
         if (isGenerated())
             return;
         
-        //if we don't have a direction selected
+        //if we don't have a direction selected, pick a random direction
         if (direction == null)
-        {
-            //pick a random direction
             direction = Directions.values()[random.nextInt(Directions.values().length)];
-        }
-        
-        //clear list
-        tmp.clear();
-        
+
         //our optional rooms to create passages
         final Room room1;
         final Room room2;
-        
+
+        //get our 2 rooms to choose between
         switch (direction)
         {
             case NW:
-                room1 = getRoom(col - 1, row);
-                room2 = getRoom(col, row - 1);
+                if (isHexagon()) {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.West);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.NorthWest);
+                } else {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.West);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.North);
+                }
                 break;
                 
             case NE:
-                room1 = getRoom(col + 1, row);
-                room2 = getRoom(col, row - 1);
+                if (isHexagon()) {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.East);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.NorthEast);
+                } else {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.East);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.North);
+                }
                 break;
                 
             case SW:
-                room1 = getRoom(col - 1, row);
-                room2 = getRoom(col, row + 1);
+                if (isHexagon()) {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.West);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.SouthWest);
+                } else {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.West);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.South);
+                }
                 break;
                 
             case SE:
-                room1 = getRoom(col + 1, row);
-                room2 = getRoom(col, row + 1);
+                if (isHexagon()) {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.East);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.SouthEast);
+                } else {
+                    room1 = getRoomNeighbor(col, row, Room.Wall.East);
+                    room2 = getRoomNeighbor(col, row, Room.Wall.South);
+                }
                 break;
                 
             default:
                 throw new Exception("Direction is not handled here " + direction.toString());
         }
-        
-        //if the room exists, add to the list
-        if (room1 != null)
-            tmp.add(room1);
-        if (room2 != null)
-            tmp.add(room2);
-        
-        //join the rooms if there is at least one in our list
-        if (!tmp.isEmpty())
-        {
-            //get the current room
-            final Room room = getRoom(col, row);
 
-            //now join the current room to a random room from the list
-            MazeHelper.joinRooms(isHexagon(), room, tmp.get(random.nextInt(tmp.size())));
+        //check our rooms to see what we can do
+        if (room1 != null && room2 == null) {
+            MazeHelper.joinRooms(isHexagon(), getRoom(col, row), room1);
+        } else if (room1 == null && room2 != null) {
+            MazeHelper.joinRooms(isHexagon(), getRoom(col, row), room2);
+        } else if (room1 != null && room2 != null) {
+            //if both rooms exist, pick one at random
+            MazeHelper.joinRooms(isHexagon(), getRoom(col, row), random.nextBoolean() ? room1 : room2);
         }
-        
+
         //move to the next column
         col++;
         

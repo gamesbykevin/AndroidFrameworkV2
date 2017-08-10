@@ -138,7 +138,27 @@ public class Sidewinder extends Maze
             final Room room = options.get(random.nextInt(options.size()));
 
             //the room to the north
-            final Room north = getRoom(room.getCol(), room.getRow() - 1);
+            final Room north;
+
+            //if hexagon we have 2 options for north
+            if (isHexagon()) {
+
+                //2 optional rooms
+                Room room1 = getRoomNeighbor(room, Room.Wall.NorthWest);
+                Room room2 = getRoomNeighbor(room, Room.Wall.NorthEast);
+
+                if (room1 != null && room2 == null) {
+                    north = room1;
+                } else if (room1 == null && room2 != null) {
+                    north = room2;
+                } else {
+                    north = random.nextBoolean() ? room1 : room2;
+                }
+
+            } else {
+                //room directly above to the north
+                north = getRoom(room.getCol(), room.getRow() - 1);
+            }
 
             //mark the rooms as visited
             room.setVisited(true);

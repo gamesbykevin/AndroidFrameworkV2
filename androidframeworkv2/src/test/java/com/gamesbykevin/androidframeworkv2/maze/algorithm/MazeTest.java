@@ -1,6 +1,7 @@
 package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
 import com.gamesbykevin.androidframeworkv2.maze.Maze;
+import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
 
 import java.util.Random;
 
@@ -8,21 +9,45 @@ import java.util.Random;
  * Created by Kevin on 8/6/2017.
  */
 
-public abstract class MazeTest extends Maze {
-
-    //size of maze
-    public static final int COLS = 5;
-    public static final int ROWS = 10;
-
-    //is maze hexagon
-    public static final boolean HEXAGON = false;
+public abstract class MazeTest {
 
     //object used to generate random events
     public static Random RANDOM = new Random();
 
-    public MazeTest() throws Exception {
-        super(HEXAGON, COLS, ROWS);
+    /**
+     * Default list of scenarios for testing
+     */
+    public enum Scenario {
+
+        Scenario1(true, 5, 7),
+        Scenario2(false, 5, 7),
+        Scenario3(true, 10, 10),
+        Scenario4(false, 10, 10),
+        ;
+
+        private final boolean hexagon;
+        private final int cols, rows;
+
+        private Scenario(boolean hexagon, int cols, int rows) {
+            this.hexagon = hexagon;
+            this.cols = cols;
+            this.rows = rows;
+        }
+
+        public boolean isHexagon() {
+            return this.hexagon;
+        }
+
+        public int getCols() {
+            return this.cols;
+        }
+
+        public int getRows() {
+            return this.rows;
+        }
     }
 
-    public abstract void update(Random random);
+    public MazeTest() {
+        UtilityHelper.DEBUG = true;
+    }
 }
