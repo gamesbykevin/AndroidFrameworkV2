@@ -29,42 +29,80 @@ public class MazeHelper
             throw new Exception("The rooms are not neighbors");
 
         if (hexagon) {
-            if (colDiff != 0) {
 
-                if (room1.getCol() > room2.getCol()) {
-
-                    if (room1.getRow() > room2.getRow()) {
-                        room1.removeWall(Wall.NorthWest);
-                        room2.removeWall(Wall.SouthEast);
-                    } else {
-                        room1.removeWall(Wall.SouthWest);
-                        room1.removeWall(Wall.NorthEast);
-                    }
-
-                } else {
-
-                    if (room1.getRow() > room2.getRow()) {
+            //north east
+            if (room1.getRow() > room2.getRow()) {
+                if (room1.getRow() % 2 == 0) {
+                    if (room1.getCol() == room2.getCol()) {
                         room1.removeWall(Wall.NorthEast);
                         room2.removeWall(Wall.SouthWest);
-                    } else {
+                    }
+                } else {
+                    if (room1.getCol() < room2.getCol()) {
+                        room1.removeWall(Wall.NorthEast);
+                        room2.removeWall(Wall.SouthWest);
+                    }
+                }
+            }
+
+            //south east
+            if (room1.getRow() < room2.getRow()) {
+                if (room1.getRow() % 2 == 0) {
+                    if (room1.getCol() == room2.getCol()) {
+                        room1.removeWall(Wall.SouthEast);
+                        room2.removeWall(Wall.NorthWest);
+                    }
+                } else {
+                    if (room1.getCol() < room2.getCol()) {
                         room1.removeWall(Wall.SouthEast);
                         room2.removeWall(Wall.NorthWest);
                     }
                 }
+            }
 
-            } else {
+            //west
+            if (room1.getRow() == room2.getRow() && room1.getCol() > room2.getCol()) {
+                room1.removeWall(Wall.West);
+                room2.removeWall(Wall.East);
+            }
 
-                if (room1.getRow() > room2.getRow()) {
-                    room1.removeWall(Wall.North);
-                    room2.removeWall(Wall.South);
+            //east
+            if (room1.getRow() == room2.getRow() && room1.getCol() < room2.getCol()) {
+                room1.removeWall(Wall.East);
+                room2.removeWall(Wall.West);
+            }
+
+            //north west
+            if (room1.getRow() > room2.getRow()) {
+                if (room1.getRow() % 2 == 0) {
+                    if (room1.getCol() > room2.getCol()) {
+                        room1.removeWall(Wall.NorthWest);
+                        room2.removeWall(Wall.SouthEast);
+                    }
                 } else {
-                    room1.removeWall(Wall.South);
-                    room2.removeWall(Wall.North);
+                    if (room1.getCol() == room2.getCol()) {
+                        room1.removeWall(Wall.NorthWest);
+                        room2.removeWall(Wall.SouthEast);
+                    }
+                }
+            }
+
+            //south west
+            if (room1.getRow() < room2.getRow()) {
+                if (room1.getRow() % 2 == 0) {
+                    if (room1.getCol() > room2.getCol()) {
+                        room1.removeWall(Wall.SouthWest);
+                        room2.removeWall(Wall.NorthEast);
+                    }
+                } else {
+                    if (room1.getCol() == room2.getCol()) {
+                        room1.removeWall(Wall.SouthWest);
+                        room2.removeWall(Wall.NorthEast);
+                    }
                 }
             }
 
         } else {
-
 
             //if the columns are not equal they are horizontal neighbors
             if (colDiff != 0) {
@@ -125,40 +163,24 @@ public class MazeHelper
             //flag the current room as visited
             room.setVisited(true);
 
-            if (maze.isHexagon()) {
+            //check all walls
+            for (Room.Wall wall : Room.getAllWalls(maze.isHexagon())) {
 
-                //check if the north room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.North, options);
+                //get the neighbor room
+                Room neighbor = maze.getRoomNeighbor(room, wall);
 
-                //check if the south room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.South, options);
 
-                //check if the north room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.NorthEast, options);
-
-                //check if the south room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.SouthEast, options);
-
-                //check if the north room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.NorthWest, options);
-
-                //check if the south room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.SouthWest, options);
-
-            } else {
-                //check if the west room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.West, options);
-
-                //check if the east room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.East, options);
-
-                //check if the north room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.North, options);
-
-                //check if the south room can be added to the options list
-                performRoomCheck(maze, room, Room.Wall.South, options);
+                ss;
             }
-            
+
+
+            for (int i = 0; i < Room.getAllWalls(maze.isHexagon()).size(); i++) {
+                Wall wall = Room.getAllWalls(maze.isHexagon()).get(i);
+
+                //check if the room in the specified direction can be added to the options list
+                performRoomCheck(maze, room, wall, options);
+            }
+
             //now that we have checked the current room, remove from our list
             options.remove(0);
         }
@@ -174,46 +196,9 @@ public class MazeHelper
      */
     private static void performRoomCheck(final Maze maze, final Room current, final Room.Wall direction, final List<Room> options) throws Exception
     {
-        Room room = null;
-        
-        switch (direction)
-        {
-            case East:
-                room = maze.getRoom(current.getCol() + 1, current.getRow());
-                break;
-                
-            case West:
-                room = maze.getRoom(current.getCol() - 1, current.getRow());
-                break;
-                
-            case South:
-                room = maze.getRoom(current.getCol(), current.getRow() + 1);
-                break;
-                
-            case North:
-                room = maze.getRoom(current.getCol(), current.getRow() - 1);
-                break;
+        //get the neighbor room
+        Room room = maze.getRoom(current.getCol() + direction.getCol(), current.getRow() + direction.getRow());
 
-            case NorthWest:
-                room = maze.getRoom(current.getCol() - 1, current.getRow() - 1);
-                break;
-
-            case NorthEast:
-                room = maze.getRoom(current.getCol() + 1, current.getRow() - 1);
-                break;
-
-            case SouthWest:
-                room = maze.getRoom(current.getCol() - 1, current.getRow() + 1);
-                break;
-
-            case SouthEast:
-                room = maze.getRoom(current.getCol() + 1, current.getRow() + 1);
-                break;
-
-            default:
-                throw new Exception("Direction not setup here " + direction.toString());
-        }
-        
         //make sure room exists and we haven't already visited
         if (room != null && !room.hasVisited())
         {

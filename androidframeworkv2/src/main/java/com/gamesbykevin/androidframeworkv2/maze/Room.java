@@ -18,14 +18,33 @@ public class Room implements Disposable
     
     //assign a unique object to identify the room
     private UUID id;
-    
+
+    //all wall possibilities depending on the shape
+    private static List<Wall> allWalls;
+
     /**
      * All of the possible walls in a room
      */
     public enum Wall
     {
-        North, South, West, East,
-        NorthWest, NorthEast, SouthEast, SouthWest
+        North(0, -1), South(0, 1), West(-1, 0), East(1, 0),
+        NorthWest(0, -1), NorthEast(1, -1), SouthEast(1, 1), SouthWest(0, 1);
+
+        //offset coordinates
+        private final int col, row;
+
+        private Wall(int col, int row) {
+            this.col = col;
+            this.row = row;
+        }
+
+        public int getCol() {
+            return this.col;
+        }
+
+        public int getRow() {
+            return this.row;
+        }
     }
     
     /**
@@ -58,7 +77,7 @@ public class Room implements Disposable
         setId(UUID.randomUUID());
         
         //create a list for our walls
-        this.walls = new ArrayList<Wall>();
+        this.walls = new ArrayList<>();
     }
     
     /**
@@ -173,7 +192,7 @@ public class Room implements Disposable
         //we did not find the wall return false
         return false;
     }
-    
+
     /**
      * Add all possible walls to the list.<br>
      * Hexagons have 6 walls, while Squares have 4
@@ -181,23 +200,9 @@ public class Room implements Disposable
      */
     public void addAllWalls(boolean hexagon)
     {
-        if (hexagon) {
-
-            //hexagons we have 6 walls
-            addWall(Wall.NorthWest);
-            addWall(Wall.North);
-            addWall(Wall.NorthEast);
-            addWall(Wall.SouthEast);
-            addWall(Wall.South);
-            addWall(Wall.SouthWest);
-
-        } else {
-
-            //squares only have 4 walls
-            addWall(Wall.North);
-            addWall(Wall.South);
-            addWall(Wall.West);
-            addWall(Wall.East);
+        //add all possible walls
+        for (int i = 0; i < getAllWalls(hexagon).size(); i++) {
+            addWall(getAllWalls(hexagon).get(i));
         }
     }
     
@@ -242,7 +247,53 @@ public class Room implements Disposable
     {
         return this.walls;
     }
-    
+
+    /**
+     * Get the list of all the possible walls for a given room shape/
+     * @param hexagon Is the room a hexagon shape?
+     * @return List of walls in each room
+     */
+    public static List<Wall> getAllWalls(final boolean hexagon) {
+        return getAllWalls(hexagon, false);
+    }
+
+    /**
+     * Get the list of all the possible walls for a given room shape/
+     * @param hexagon Is the room a hexagon shape?
+     * @param clear Do we clear the cached list and re-populate it?
+     * @return List of walls in each room
+     */
+    public static List<Wall> getAllWalls(final boolean hexagon, final boolean clear) {
+
+        if (allWalls == null)
+            allWalls = new ArrayList<>();
+
+        //do we clear the cached list?
+        if (clear)
+            allWalls.clear();
+
+        if (allWalls.isEmpty()) {
+            if (hexagon) {
+                //hexagon has 6 walls
+                allWalls.add(Wall.NorthWest);
+                allWalls.add(Wall.NorthEast);
+                allWalls.add(Wall.SouthWest);
+                allWalls.add(Wall.SouthEast);
+                allWalls.add(Wall.West);
+                allWalls.add(Wall.East);
+            } else {
+                //square has 4 walls
+                allWalls.add(Wall.North);
+                allWalls.add(Wall.South);
+                allWalls.add(Wall.West);
+                allWalls.add(Wall.East);
+            }
+        }
+
+        //return our list
+        return allWalls;
+    }
+
     /**
      * Assign the cost
      * @param cost The desired cost of this room

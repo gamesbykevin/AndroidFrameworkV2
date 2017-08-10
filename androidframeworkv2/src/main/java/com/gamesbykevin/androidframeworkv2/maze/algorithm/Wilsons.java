@@ -119,28 +119,10 @@ public class Wilsons extends Maze
         //if the list is empty, locate optional directions
         if (tmp.isEmpty())
         {
-            if (isHexagon()) {
-                if (hasBounds(col, row - 1))
-                    tmp.add(Wall.North);
-                if (hasBounds(col, row + 1))
-                    tmp.add(Wall.South);
-                if (hasBounds(col - 1, row - 1))
-                    tmp.add(Wall.NorthWest);
-                if (hasBounds(col + 1, row - 1))
-                    tmp.add(Wall.NorthEast);
-                if (hasBounds(col - 1, row + 1))
-                    tmp.add(Wall.SouthWest);
-                if (hasBounds(col + 1, row + 1))
-                    tmp.add(Wall.SouthEast);
-            } else {
-                if (hasBounds(col + 1, row))
-                    tmp.add(Wall.East);
-                if (hasBounds(col - 1, row))
-                    tmp.add(Wall.West);
-                if (hasBounds(col, row - 1))
-                    tmp.add(Wall.North);
-                if (hasBounds(col, row + 1))
-                    tmp.add(Wall.South);
+            for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+                Wall wall = Room.getAllWalls(isHexagon()).get(i);
+                if (hasBounds(col + wall.getCol(), row + wall.getRow()))
+                    tmp.add(wall);
             }
         }
         
@@ -151,56 +133,9 @@ public class Wilsons extends Maze
         directions.add(new Target(direction, col, row));
         
         //update the location based on our random direction
-        switch (direction)
-        {
-            case NorthWest:
-                //change position
-                col--;
-                row--;
-                break;
+        col = (col + direction.getCol());
+        row = (row + direction.getRow());
 
-            case NorthEast:
-                //change position
-                col++;
-                row--;
-                break;
-
-            case SouthEast:
-                //change position
-                col++;
-                row++;
-                break;
-
-            case SouthWest:
-                //change position
-                col--;
-                row++;
-                break;
-
-            case West:
-                //change position
-                col--;
-                break;
-                
-            case East:
-                //change position
-                col++;
-                break;
-                
-            case North:
-                //change position
-                row--;
-                break;
-                
-            case South:
-                //change position
-                row++;
-                break;
-
-            default:
-                throw new RuntimeException("Direction not handled: " + direction);
-        }
-        
         /**
          * If this room was visited (a.k.a. part of the maze)<br>
          * We will now create the path and from the start to this location and make it part of the maze
@@ -222,44 +157,8 @@ public class Wilsons extends Maze
                     if (directions.get(index).hasTarget(room1))
                     {
                         //get the next room in our steps
-                        switch (directions.get(index).direction)
-                        {
-                            case NorthWest:
-                                room2 = getRoom(startCol - 1, startRow - 1);
-                                break;
+                        room2 = getRoom(startCol + directions.get(index).direction.getCol(), startRow + directions.get(index).direction.getRow());
 
-                            case NorthEast:
-                                room2 = getRoom(startCol + 1, startRow - 1);
-                                break;
-
-                            case SouthWest:
-                                room2 = getRoom(startCol - 1, startRow + 1);
-                                break;
-
-                            case SouthEast:
-                                room2 = getRoom(startCol + 1, startRow + 1);
-                                break;
-
-                            case West:
-                                room2 = getRoom(startCol - 1, startRow);
-                                break;
-
-                            case East:
-                                room2 = getRoom(startCol + 1, startRow);
-                                break;
-
-                            case South:
-                                room2 = getRoom(startCol, startRow + 1);
-                                break;
-
-                            case North:
-                                room2 = getRoom(startCol, startRow - 1);
-                                break;
-
-                            default:
-                                throw new Exception("Direction not handled here " + directions.get(0).toString());
-                        }
-                
                         //now remove this target
                         directions.remove(index);
                         
@@ -340,28 +239,54 @@ public class Wilsons extends Maze
              * Compare the room to the current location. 
              * So we know which direction to head in
              */
-            if (isHexagon()) {
-                if (room.getRow() > row)
-                    tmp.add(Wall.South);
-                if (room.getRow() < row)
-                    tmp.add(Wall.North);
-                if (room.getRow() > row && room.getCol() > col)
-                    tmp.add(Wall.SouthEast);
-                if (room.getRow() > row && room.getCol() < col)
-                    tmp.add(Wall.SouthWest);
-                if (room.getRow() < row && room.getCol() > col)
-                    tmp.add(Wall.NorthEast);
-                if (room.getRow() < row && room.getCol() < col)
-                    tmp.add(Wall.NorthWest);
-            } else {
-                if (room.getCol() > col)
-                    tmp.add(Wall.East);
-                if (room.getCol() < col)
-                    tmp.add(Wall.West);
-                if (room.getRow() > row)
-                    tmp.add(Wall.South);
-                if (room.getRow() < row)
-                    tmp.add(Wall.North);
+            for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+                Wall wall = Room.getAllWalls(isHexagon()).get(i);
+
+                switch (wall) {
+
+                    case North:
+                        if (room.getRow() < row)
+                            tmp.add(wall);
+                        break;
+
+                    case South:
+                        if (room.getRow() > row)
+                            tmp.add(wall);
+                        break;
+
+                    case West:
+                        if (room.getCol() < col)
+                            tmp.add(wall);
+                        break;
+
+                    case East:
+                        if (room.getCol() > col)
+                            tmp.add(wall);
+                        break;
+
+                    case NorthWest:
+                        if (room.getRow() < row && room.getCol() < col)
+                            tmp.add(wall);
+                        break;
+
+                    case NorthEast:
+                        if (room.getRow() < row && room.getCol() > col)
+                            tmp.add(wall);
+                        break;
+
+                    case SouthWest:
+                        if (room.getRow() > row && room.getCol() < col)
+                            tmp.add(wall);
+                        break;
+
+                    case SouthEast:
+                        if (room.getRow() > row && room.getCol() > col)
+                            tmp.add(wall);
+                        break;
+
+                    default:
+                        throw new RuntimeException("Wall not defined: " + wall.toString());
+                }
             }
         }
     }

@@ -17,9 +17,6 @@ public class GrowingTree extends Maze
     //temporary list of optional rooms
     private List<Room> options, tmp;
 
-    //list of rooms for us to check on
-    private List<Room> checking;
-
     public GrowingTree(final boolean hexagon, final int cols, final int rows) throws Exception
     {
         super(hexagon, cols, rows);
@@ -30,7 +27,6 @@ public class GrowingTree extends Maze
         //create new lists
         this.options = new ArrayList<>();
         this.tmp = new ArrayList<>();
-        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -83,37 +79,19 @@ public class GrowingTree extends Maze
         
         //get that random room
         final Room room = options.get(index);
-        
-        checking.clear();
-
-        //check neighbors
-        if (isHexagon()) {
-
-            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-            checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
-            checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
-            checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
-            checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
-
-        } else {
-
-            checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
-            checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
-            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-        }
 
         //clear the list
         tmp.clear();
 
-        //add any rooms that have not been visited to our list
-        for (int i = 0; i < checking.size(); i++) {
+        //check neighbors
+        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+            Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
 
-            Room tmp1 = checking.get(i);
+            Room roomTmp = getRoom(room.getCol() + wall.getCol(), room.getRow() + wall.getRow());
 
-            if (tmp1 != null && !tmp1.hasVisited())
-                tmp.add(tmp1);
+            //add any rooms that have not been visited to our list
+            if (roomTmp != null && !roomTmp.hasVisited())
+                tmp.add(roomTmp);
         }
 
         //if there are no unvisited neighbors

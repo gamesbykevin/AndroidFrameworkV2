@@ -23,9 +23,6 @@ public class HuntKill extends Maze
     //have we hit a dead end
     private boolean deadend = false;
 
-    //list of rooms for us to check on
-    private List<Room> checking;
-
     public HuntKill(final boolean hexagon, final int cols, final int rows) throws Exception
     {
         super(hexagon, cols, rows);
@@ -35,7 +32,6 @@ public class HuntKill extends Maze
         
         //create a new list
         this.options = new ArrayList<>();
-        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -85,29 +81,15 @@ public class HuntKill extends Maze
                     if (room.hasVisited())
                         continue;
 
-                    checking.clear();
-
-                    //check neighbors
-                    if (isHexagon()) {
-                        checking.add(getRoom(col, row - 1));    //north
-                        checking.add(getRoom(col, row + 1));    //south
-                        checking.add(getRoom(col + 1, row - 1));//north east
-                        checking.add(getRoom(col + 1, row + 1));//south east
-                        checking.add(getRoom(col - 1, row - 1));//north west
-                        checking.add(getRoom(col - 1, row + 1));//south west
-                    } else {
-                        checking.add(getRoom(col + 1, row));    //east
-                        checking.add(getRoom(col - 1, row));    //west
-                        checking.add(getRoom(col, row - 1));    //north
-                        checking.add(getRoom(col, row + 1));    //south
-                    }
-                    
                     //clear the list of objects
                     options.clear();
 
-                    for (int i = 0; i < checking.size(); i++) {
+                    //check all neighbors
+                    for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+                        Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
 
-                        Room tmp = checking.get(i);
+                        //get the neighbor room
+                        Room tmp = getRoom(col + wall.getCol(), row + wall.getRow());
 
                         if (tmp != null && tmp.hasVisited())
                             options.add(tmp);
@@ -137,27 +119,14 @@ public class HuntKill extends Maze
             }
         }
 
-        checking.clear();
+        //check all neighbors
+        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+            Room.Wall wall = Room.getAllWalls(isHexagon()).get(i);
 
-        //check neighbors
-        if (isHexagon()) {
-            checking.add(getRoom(currentCol, currentRow - 1));    //north
-            checking.add(getRoom(currentCol, currentRow + 1));    //south
-            checking.add(getRoom(currentCol + 1, currentRow - 1));//north east
-            checking.add(getRoom(currentCol + 1, currentRow + 1));//south east
-            checking.add(getRoom(currentCol - 1, currentRow - 1));//north west
-            checking.add(getRoom(currentCol - 1, currentRow + 1));//south west
-        } else {
-            checking.add(getRoom(currentCol + 1, currentRow));    //east
-            checking.add(getRoom(currentCol - 1, currentRow));    //west
-            checking.add(getRoom(currentCol, currentRow - 1));    //north
-            checking.add(getRoom(currentCol, currentRow + 1));    //south
-        }
+            //get the neighbor room
+            Room tmp = getRoom(currentCol + wall.getCol(), currentRow + wall.getRow());
 
-        //if the rooms exist and have not visited, add it to the list
-        for (int i = 0; i < checking.size(); i++) {
-            Room tmp = checking.get(i);
-
+            //if the rooms exist and have not visited, add it to the list
             if (tmp != null && !tmp.hasVisited())
                 options.add(tmp);
         }

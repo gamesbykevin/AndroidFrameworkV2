@@ -26,11 +26,11 @@ public class RecursiveBacktracking extends Maze
     {
         super(hexagon, cols, rows);
         
-        //set 4 walls for each room
+        //set walls for each room
         super.populateRooms();
         
         //create new list, to track the steps
-        this.steps = new ArrayList<Cell>();
+        this.steps = new ArrayList<>();
     }
     
     @Override
@@ -68,21 +68,13 @@ public class RecursiveBacktracking extends Maze
         //create empty list of optional walls
         List<Wall> options = new ArrayList<Wall>();
 
-        //check the west, make sure we are inbounds and have not visited our neighbor
-        if (hasBounds(col - 1, row) && !getRoom(col - 1, row).hasVisited())
-            options.add(Wall.West);
+        for (int i = 0; i < Room.getAllWalls(isHexagon()).size(); i++) {
+            Wall wall = Room.getAllWalls(isHexagon()).get(i);
 
-        //check the east, make sure we are inbounds and have not visited our neighbor
-        if (hasBounds(col + 1, row) && !getRoom(col + 1, row).hasVisited())
-            options.add(Wall.East);
-
-        //check the north, make sure we are inbounds and have not visited our neighbor
-        if (hasBounds(col, row - 1) && !getRoom(col, row - 1).hasVisited())
-            options.add(Wall.North);
-
-        //check the south, make sure we are inbounds and have not visited our neighbor
-        if (hasBounds(col, row + 1) && !getRoom(col, row + 1).hasVisited())
-            options.add(Wall.South);
+            //check the wall direction, make sure we are inbounds and have not visited our neighbor
+            if (hasBounds(col + wall.getCol(), row + wall.getRow()) && !getRoom(col + wall.getCol(), row + wall.getRow()).hasVisited())
+                options.add(wall);
+        }
 
         //if there are no options we have to back track
         if (options.isEmpty())
@@ -105,55 +97,50 @@ public class RecursiveBacktracking extends Maze
             //mark this as visited
             getRoom(col, row).setVisited(true);
 
-            //remove the wall from our neighbor
+            //update new location based on wall direction
+            row = row + wall.getRow();
+            col = col + wall.getCol();
+
+            //mark this as visited
+            getRoom(col, row).setVisited(true);
+
+            //remove the wall from our neighbor accordingly
             switch (wall)
             {
+                case NorthWest:
+                    getRoom(col, row).removeWall(Wall.SouthEast);
+                    break;
+
+                case NorthEast:
+                    getRoom(col, row).removeWall(Wall.SouthWest);
+                    break;
+
+                case SouthWest:
+                    getRoom(col, row).removeWall(Wall.NorthEast);
+                    break;
+
+                case SouthEast:
+                    getRoom(col, row).removeWall(Wall.NorthWest);
+                    break;
+
                 case North:
-                    //now set the new location
-                    row = row - 1;
-
-                    //remove the wall
                     getRoom(col, row).removeWall(Wall.South);
-
-                    //mark this as visited
-                    getRoom(col, row).setVisited(true);
                     break;
 
                 case South:
-                    //now set the new location
-                    row = row + 1;
-
-                    //remove the wall
                     getRoom(col, row).removeWall(Wall.North);
-
-                    //mark this as visited
-                    getRoom(col, row).setVisited(true);
                     break;
 
                 case West:
-                    //now set the new location
-                    col = col - 1;
-
-                    //remove the wall
                     getRoom(col, row).removeWall(Wall.East);
-
-                    //mark this as visited
-                    getRoom(col, row).setVisited(true);
                     break;
 
                 case East:
-                    //now set the new location
-                    col = col + 1;
-
-                    //remove the wall
                     getRoom(col, row).removeWall(Wall.West);
-
-                    //mark this as visited
-                    getRoom(col, row).setVisited(true);
                     break;
 
                 default:
-                    throw new Exception("The wall was not found here " + wall.toString());
+                    throw new Exception("Wall not defined: " + wall.toString());
             }
             
             //add the current location as part of the steps

@@ -5,6 +5,11 @@ import com.gamesbykevin.androidframeworkv2.util.Progress;
 
 import java.util.Random;
 
+import static com.gamesbykevin.androidframeworkv2.maze.Room.Wall.NorthEast;
+import static com.gamesbykevin.androidframeworkv2.maze.Room.Wall.NorthWest;
+import static com.gamesbykevin.androidframeworkv2.maze.Room.Wall.SouthEast;
+import static com.gamesbykevin.androidframeworkv2.maze.Room.Wall.SouthWest;
+
 /**
  * The parent Maze class
  * @author GOD
@@ -52,6 +57,9 @@ public abstract class Maze implements IMaze
     {
         //assign the shape of room
         this.hexagon = hexagon;
+
+        //clear the cached list just in case
+        Room.getAllWalls(isHexagon(), true);
 
         if (cols < 2)
             throw new Exception("The maze must contain at least 2 columns");
@@ -251,7 +259,58 @@ public abstract class Maze implements IMaze
             this.rooms = null;
         }
     }
-    
+
+    protected Room getRoomNeighbor(final Room room, Room.Wall direction) {
+        return getRoomNeighbor(room.getCol(), room.getRow(), direction);
+    }
+
+    protected Room getRoomNeighbor(final int col, final int row, Room.Wall direction) {
+
+        int tmpCol = direction.getCol();
+        int tmpRow = direction.getRow();
+
+        //need to verify neighbors
+        if (isHexagon()) {
+            switch (direction) {
+
+                case NorthWest:
+                    if (row % 2 == 0) {
+                        tmpCol = -1;
+                    } else {
+                        tmpCol = 0;
+                    }
+                    break;
+
+                case NorthEast:
+                    if (row % 2 == 0) {
+                        tmpCol = 0;
+                    } else {
+                        tmpCol = 1;
+                    }
+                    break;
+
+                case SouthWest:
+                    if (row % 2 == 0) {
+                        tmpCol = -1;
+                    } else {
+                        tmpCol = 0;
+                    }
+                    break;
+
+                case SouthEast:
+                    if (row % 2 == 0) {
+                        tmpCol = 0;
+                    } else {
+                        tmpCol = 1;
+                    }
+                    break;
+            }
+        }
+
+        //return the neighbor room
+        return getRoom(col + tmpCol, row + tmpRow);
+    }
+
     /**
      * Get the room at the specified location
      * @param col Column

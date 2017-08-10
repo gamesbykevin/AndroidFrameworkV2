@@ -6,6 +6,10 @@ import org.junit.Test;
 
 import java.util.Random;
 
+import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.COLS;
+import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.HEXAGON;
+import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.RANDOM;
+import static com.gamesbykevin.androidframeworkv2.maze.algorithm.MazeTest.ROWS;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -15,15 +19,8 @@ import static junit.framework.Assert.assertTrue;
 
 public class HuntKillTest extends HuntKill {
 
-    private static final int COLS = 10;
-    private static final int ROWS = 10;
-
-    public static boolean hexagon = true;
-
-    public static Random RANDOM = new Random();
-
     public HuntKillTest() throws Exception {
-        super(hexagon, COLS, ROWS);
+        super(HEXAGON, COLS, ROWS);
 
         //flag debug true
         UtilityHelper.DEBUG = true;
@@ -41,6 +38,8 @@ public class HuntKillTest extends HuntKill {
 
                 //assume not generated
                 assertFalse(maze.isGenerated());
+
+                UtilityHelper.logEvent("Maze generation progress: " + maze.getProgress().getProgress());
 
                 //generate more
                 maze.update(RANDOM);

@@ -35,9 +35,6 @@ public class AldousBroder extends Maze
     //temporary object used to generate maze
     private List<Room> options;
 
-    //list of rooms for us to check on
-    private List<Room> checking;
-
     public AldousBroder(final boolean hexagon, final int cols, final int rows) throws Exception
     {
         super(hexagon, cols, rows);
@@ -50,7 +47,6 @@ public class AldousBroder extends Maze
         
         //create new list(s)
         this.options = new ArrayList<>();
-        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -85,55 +81,41 @@ public class AldousBroder extends Maze
         //our temporary room
         Room room = getRoom(col, row);
 
-        //clear the list
-        checking.clear();
-
-        //check in each possible direction
-        if (isHexagon()) {
-            checking.add(getRoom(col, row - 1));    //north
-            checking.add(getRoom(col, row + 1));    //south
-            checking.add(getRoom(col - 1, row - 1));//north west
-            checking.add(getRoom(col + 1, row - 1));//north east
-            checking.add(getRoom(col - 1, row + 1));//south west
-            checking.add(getRoom(col + 1, row + 1));//south east
-        } else {
-            checking.add(getRoom(col - 1, row));    //east
-            checking.add(getRoom(col + 1, row));    //west
-            checking.add(getRoom(col, row - 1));    //north
-            checking.add(getRoom(col, row + 1));    //south
-        }
-
         //make sure the list is empty
         options.clear();
-        
+
         /**
          * If we are close to finishing the maze...
          * or if we have reached the number of failed attempts limit<br>
-         * 
+         *
          * Lets target any existing unvisited rooms, to help complete the maze
          */
-        if (getProgress().getProgress() >= LOCATE_TARGET_PROGRESS_RATIO || count > failedAttemptsLimit)
-        {
-            //check every room in  our list
-            for (int i = 0; i < checking.size(); i++) {
+        if (getProgress().getProgress() >= LOCATE_TARGET_PROGRESS_RATIO || count > failedAttemptsLimit) {
 
-                Room tmp = checking.get(i);
+            //check all walls
+            for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
+
+                //get the neighbor
+                Room tmp = getRoomNeighbor(room, wall);
 
                 if (tmp != null && !tmp.hasVisited())
                     options.add(tmp);
             }
         }
-        
+
         //if we still don't have any options
         if (options.isEmpty())
         {
             //increase the count
             count++;
 
-            //add all existing neighbor(s)
-            for (int i = 0; i < checking.size(); i++) {
-                if (checking.get(i) != null)
-                    options.add(checking.get(i));
+            //check all walls
+            for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
+
+                Room tmp = getRoomNeighbor(col, row, wall);
+
+                if (tmp != null)
+                    options.add(tmp);
             }
         }
         
@@ -159,9 +141,7 @@ public class AldousBroder extends Maze
         }
         else
         {
-            /**
-             * If we reached the limit of failed attempts
-             */
+            //if we reached the limit of failed attempts
             if (count > failedAttemptsLimit)
             {
                 //place at room next to unvisited room
@@ -189,27 +169,9 @@ public class AldousBroder extends Maze
                 //if this room has not been visited
                 if (!getRoom(col1, row1).hasVisited())
                 {
-                    //clear the list
-                    checking.clear();
-
-                    //check in each possible direction
-                    if (isHexagon()) {
-                        checking.add(getRoom(col, row - 1));    //north
-                        checking.add(getRoom(col, row + 1));    //south
-                        checking.add(getRoom(col - 1, row - 1));//north west
-                        checking.add(getRoom(col + 1, row - 1));//north east
-                        checking.add(getRoom(col - 1, row + 1));//south west
-                        checking.add(getRoom(col + 1, row + 1));//south east
-                    } else {
-                        checking.add(getRoom(col - 1, row));    //east
-                        checking.add(getRoom(col + 1, row));    //west
-                        checking.add(getRoom(col, row - 1));    //north
-                        checking.add(getRoom(col, row + 1));    //south
-                    }
-
-                    for (int i = 0; i < checking.size(); i++) {
-
-                        Room tmp = checking.get(i);
+                    //check all walls
+                    for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
+                        Room tmp = getRoomNeighbor(col, row, wall);
 
                         if (tmp != null && tmp.hasVisited())
                             options.add(tmp);

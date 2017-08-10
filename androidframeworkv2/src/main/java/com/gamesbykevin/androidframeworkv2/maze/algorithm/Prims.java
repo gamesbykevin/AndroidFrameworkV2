@@ -17,19 +17,15 @@ public class Prims extends Maze
     //list of rooms to check
     private List<Room> options;
 
-    //list of rooms for us to check on
-    private List<Room> checking;
-
     public Prims(final boolean hexagon, final int cols, final int rows) throws Exception
     {
         super(hexagon, cols, rows);
         
-        //set 4 walls for each room
+        //set walls for each room
         super.populateRooms();
         
         //create a new list of optional rooms
         this.options = new ArrayList<>();
-        this.checking = new ArrayList<>();
     }
     
     @Override
@@ -76,33 +72,16 @@ public class Prims extends Maze
         //if we have started
         if (MazeHelper.hasVisited(this))
         {
-            checking.clear();
-
-            //check if any neighbors can be joined to the room
-            if (isHexagon()) {
-
-                checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-                checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-                checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
-                checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
-                checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
-                checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
-
-            } else {
-
-                checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
-                checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
-                checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-                checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-            }
-
             //list of choices to move to
-            final List<Room> choices = new ArrayList<Room>();
+            final List<Room> choices = new ArrayList<>();
 
-            //we only want to add the room that exists and is already visited to join with
-            for (int i = 0; i < checking.size(); i++) {
-                Room tmp = checking.get(i);
+            //check all walls
+            for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
 
+                //get the neighbor room
+                Room tmp = getRoomNeighbor(room, wall);
+
+                //we only want to add the room that exists and is already visited to join with
                 if (tmp != null && tmp.hasVisited())
                     choices.add(tmp);
             }
@@ -117,31 +96,13 @@ public class Prims extends Maze
         //mark the room as visited
         room.setVisited(true);
 
+        //check all walls
+        for (Room.Wall wall : Room.getAllWalls(isHexagon())) {
 
-        checking.clear();
+            //get the neighbor room
+            Room tmp = getRoomNeighbor(room, wall);
 
-        //check if any neighbors can be joined to the room
-        if (isHexagon()) {
-
-            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-            checking.add(getRoom(room.getCol() + 1, room.getRow() - 1));//north east
-            checking.add(getRoom(room.getCol() + 1, room.getRow() + 1));//south east
-            checking.add(getRoom(room.getCol() - 1, room.getRow() - 1));//north west
-            checking.add(getRoom(room.getCol() - 1, room.getRow() + 1));//south west
-
-        } else {
-
-            checking.add(getRoom(room.getCol() + 1, room.getRow()));    //east
-            checking.add(getRoom(room.getCol() - 1, room.getRow()));    //west
-            checking.add(getRoom(room.getCol(), room.getRow() - 1));    //north
-            checking.add(getRoom(room.getCol(), room.getRow() + 1));    //south
-        }
-
-        //add any optional directions that haven't been visited and don't already exist in the list
-        for (int i = 0; i < checking.size(); i++) {
-            Room tmp = checking.get(i);
-
+            //add any optional directions that haven't been visited and don't already exist in the list
             if (tmp != null && !tmp.hasVisited() && !options.contains(tmp))
                 options.add(tmp);
         }
