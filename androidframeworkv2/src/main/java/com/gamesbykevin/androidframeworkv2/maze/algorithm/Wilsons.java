@@ -78,16 +78,13 @@ public class Wilsons extends Maze
         if (isGenerated())
             return;
         
-        //we are just creating the maze
+        //we are just creating the maze, mark the first room as visited
         if (!MazeHelper.hasVisited(this))
-        {
-            //mark the first room as visited
             getRandomRoom(random).setVisited(true);
-        }
-        
+
         //if we have no steps currently
-        if (directions.isEmpty())
-        {
+        if (directions.isEmpty()) {
+
             //pick random room to start
             final Room room = getRandomRoom(random);
             
@@ -111,11 +108,8 @@ public class Wilsons extends Maze
          * This is to help shorten the time of maze creation.
          */
         if (count >= (getCols() * getRows()) / 2)
-        {
-            //calculate shortest path
             calculateShortestPath();
-        }
-        
+
         //if the list is empty, locate optional directions
         if (tmp.isEmpty())
         {
@@ -286,7 +280,7 @@ public class Wilsons extends Maze
 
                     case NorthWest:
 
-                        //if the winning room is above us
+                        //if the winning room is above s
                         if (room.getRow() < row) {
                             if (room.getRow() % 2 == 0) {
                                 if (room.getCol() < col)

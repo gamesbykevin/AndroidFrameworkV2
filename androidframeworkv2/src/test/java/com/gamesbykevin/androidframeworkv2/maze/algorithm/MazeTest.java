@@ -23,6 +23,8 @@ public abstract class MazeTest {
         Scenario2(false, 5, 7),
         Scenario3(true, 10, 10),
         Scenario4(false, 10, 10),
+        Scenario5(false, 3, 3),
+        Scenario6(true, 3, 3)
         ;
 
         private final boolean hexagon;
@@ -49,5 +51,6 @@ public abstract class MazeTest {
 
     public MazeTest() {
         UtilityHelper.DEBUG = true;
+        UtilityHelper.UNIT_TEST = true;
     }
 }

@@ -1,6 +1,7 @@
 package com.gamesbykevin.androidframeworkv2.util;
 
 import android.content.Context;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,6 +17,11 @@ public class UtilityHelper {
     public static boolean DEBUG = false;
 
     /**
+     * Are we running unit tests
+     */
+    public static boolean UNIT_TEST = false;
+
+    /**
      * App name for our framework
      */
     public static final String TAG = "AndroidFrameworkV2";
@@ -26,8 +32,12 @@ public class UtilityHelper {
         if (!DEBUG)
             return;
 
-        //log as error
-        Log.e(TAG, exception.getMessage(), exception);
+        if (UNIT_TEST) {
+            System.out.print(exception);
+        } else {
+            //log as error
+            Log.e(TAG, exception.getMessage(), exception);
+        }
 
         //handle process
         exception.printStackTrace();
@@ -55,13 +65,22 @@ public class UtilityHelper {
                 int start = i * maxLogSize;
                 int end = (i+1) * maxLogSize;
                 end = end > message.length() ? message.length() : end;
-                Log.i(TAG, message.substring(start, end));
+
+                if (UNIT_TEST) {
+                    System.out.println(message.substring(start, end));
+                } else {
+                    Log.i(TAG, message.substring(start, end));
+                }
             }
 
         } else {
 
-            //log string as information
-            Log.i(TAG, message);
+            if (UNIT_TEST) {
+                System.out.println(message);
+            } else {
+                //log string as information
+                Log.i(TAG, message);
+            }
         }
     }
 
