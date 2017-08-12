@@ -36,7 +36,7 @@ public class HuntKillTest extends MazeTest {
                 //assume not generated
                 assertFalse(maze.isGenerated());
 
-                UtilityHelper.logEvent("Maze generation progress: " + maze.getProgress().getProgress());
+                UtilityHelper.logEvent("Maze generation progress: HuntKill " + maze.getProgress().getProgress());
 
                 //generate more
                 maze.update(RANDOM);

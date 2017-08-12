@@ -68,9 +68,8 @@ public class AldousBroder extends Maze
         if (isGenerated())
             return;
         
-        //if we haven't visited any rooms, this is the first time
+        //if we haven't visited any rooms, this is the first time pick a random location
         if (!MazeHelper.hasVisited(this)) {
-            //pick a random location
             col = random.nextInt(getCols());
             row = random.nextInt(getRows());
         }
