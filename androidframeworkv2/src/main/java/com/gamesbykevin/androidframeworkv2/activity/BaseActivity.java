@@ -137,12 +137,6 @@ public abstract class BaseActivity extends Activity implements Disposable {
             //if we want to honor the shared preferences setting and it is enabled
             vibrator.vibrate(milliseconds);
         }
-
-        //only vibrate if the setting is turned on
-        if (ignoreSetting || getBooleanValue(R.string.vibrate_file_key)) {
-            //vibrate the phone for the specified duration
-            vibrator.vibrate(milliseconds);
-        }
     }
 
     /**
