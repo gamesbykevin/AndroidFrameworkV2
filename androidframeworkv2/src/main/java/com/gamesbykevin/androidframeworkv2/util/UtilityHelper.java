@@ -7,11 +7,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import com.google.firebase.crash.FirebaseCrash;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,6 +38,11 @@ public class UtilityHelper {
     public static boolean UNIT_TEST = false;
 
     /**
+     * Is this an amazon app
+     */
+    public static boolean AMAZON = false;
+
+    /**
      * App name for our framework
      */
     public static final String TAG = "AndroidFrameworkV2";
@@ -48,20 +54,33 @@ public class UtilityHelper {
             Manifest.permission.WRITE_EXTERNAL_STORAGE
     };
 
-
     public static void handleException(final Exception exception) {
 
-        //if not debugging, don't continue
-        if (!DEBUG)
-            return;
+        if (DEBUG) {
 
-        if (UNIT_TEST) {
-            System.out.print(exception);
+            if (UNIT_TEST) {
+
+                System.out.print(exception);
+
+            } else {
+
+                //log as error
+                Log.e(TAG, exception.getMessage(), exception);
+            }
         } else {
-            //log as error
-            Log.e(TAG, exception.getMessage(), exception);
-        }
 
+            try {
+
+                //if this app isn't for amazon log in fire base
+                if (!AMAZON) {
+
+                    //report exception to fire base
+                    FirebaseCrash.report(exception);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         //handle process
         exception.printStackTrace();
     }
@@ -83,10 +102,10 @@ public class UtilityHelper {
         if (message.length() > maxLogSize) {
 
             //we will display a portion at a time
-            for(int i = 0; i <= message.length() / maxLogSize; i++) {
+            for (int i = 0; i <= message.length() / maxLogSize; i++) {
 
                 int start = i * maxLogSize;
-                int end = (i+1) * maxLogSize;
+                int end = (i + 1) * maxLogSize;
                 end = end > message.length() ? message.length() : end;
 
                 if (UNIT_TEST) {

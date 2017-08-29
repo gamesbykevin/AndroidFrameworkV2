@@ -1,56 +1,39 @@
 package com.gamesbykevin.androidframeworkv2.base;
 
-import com.gamesbykevin.androidframeworkv2.common.ICommon;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
-import javax.microedition.khronos.opengles.GL10;
+import android.graphics.PointF;
+import android.graphics.RectF;
 
 /**
- * Created by Kevin on 7/31/2017.
+ * Created by Kevin on 8/1/2017.
  */
+public class Entity extends Cell {
 
-public abstract class Entity extends Cell implements ICommon {
+    //current facing angle of the entity
+    private float angle;
 
-    //each entity will have an (x,y) coordinate
-    private float x, y;
+    //the size of the entity
+    private float scale;
 
-    //each entity will have a width and height
-    private float w, h;
+    //base rectangle
+    private RectF base;
 
-    //each entity will have a velocity
-    private double dx, dy;
+    //where do we render the entity
+    private PointF translation;
 
-    //complete transparency
-    private static final float TRANSPARENCY_FULL = 1.0f;
+    //full transparency that we can't see through
+    private static final float TRANSPARENCY_OPAQUE = 1.0f;
 
-    //the level of transparency when we render
-    private float transparency = TRANSPARENCY_FULL;
-
-    private FloatBuffer vertexBuffer;
-    private FloatBuffer textureBuffer;
-
-    private float[] vertices = {
-            0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f,
-            1.0f, 0.0f, 0.0f,
-            1.0f, 1.0f, 0.0f
-    };
-
-    private float[] textures = {
-            0.0f, 0.0f,
-            0.0f, 1.0f,
-            1.0f, 0.0f,
-            1.0f, 1.0f
-    };
+    //the level of transparency when we render, start out will full transparency
+    private float transparency = TRANSPARENCY_OPAQUE;
 
     //texture id so we know what texture to render
     private int textureId;
 
-    //current facing angle of the entity
-    private float angle = 0.0f;
+    //the coordinates used for rotation
+    private PointF nw = new PointF(), ne = new PointF(), sw = new PointF(), se = new PointF();
+
+    //the vertices of our entity
+    private float[] vertices;
 
     /**
      * Default constructor
@@ -60,19 +43,33 @@ public abstract class Entity extends Cell implements ICommon {
         //call default parent constructor
         super();
 
-        //create our vertices buffer
-        ByteBuffer vbb = ByteBuffer.allocateDirect(vertices.length * 4);
-        vbb.order(ByteOrder.nativeOrder());
-        vertexBuffer = vbb.asFloatBuffer();
-        vertexBuffer.put(vertices);
-        vertexBuffer.position(0);
+        //create our rectangle with the new coordinates
+        this.base = new RectF();
 
-        //create our texture buffer
-        ByteBuffer tbb = ByteBuffer.allocateDirect(textures.length * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        textureBuffer = tbb.asFloatBuffer();
-        textureBuffer.put(textures);
-        textureBuffer.position(0);
+        //where do we draw the entity, start so base rectangle is at origin (0,0);
+        this.translation = new PointF();
+
+        //size of the entity
+        setScale(1f);
+
+        //start rotation
+        setAngle(0f);
+    }
+
+    private PointF getTranslation() {
+        return this.translation;
+    }
+
+    private RectF getBase() {
+        return this.base;
+    }
+
+    public void setScale(final float scale) {
+        this.scale = scale;
+    }
+
+    public float getScale() {
+        return this.scale;
     }
 
     /**
@@ -124,8 +121,7 @@ public abstract class Entity extends Cell implements ICommon {
      * @param entity The entity we want to compare
      * @return The distance between the current and specified entities
      */
-    public double getDistance(final Entity entity)
-    {
+    public double getDistance(final Entity entity) {
         return getDistance(entity.getX(), entity.getY());
     }
 
@@ -135,8 +131,7 @@ public abstract class Entity extends Cell implements ICommon {
      * @param y y-coordinate
      * @return The distance between the entity and specified (x,y)
      */
-    public double getDistance(final double x, final double y)
-    {
+    public double getDistance(final double x, final double y) {
         return getDistance(x, y, getX(), getY());
     }
 
@@ -148,125 +143,63 @@ public abstract class Entity extends Cell implements ICommon {
      * @param y2 y-coordinate
      * @return The distance between the 2 specified (x,y) coordinates
      */
-    public static double getDistance(final double x1, final double y1, final double x2, final double y2)
-    {
+    public static double getDistance(final double x1, final double y1, final double x2, final double y2) {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-    }
-
-    /**
-     * Get the x-velocity
-     * @return the assigned x-velocity
-     */
-    public double getDX()
-    {
-        return this.dx;
-    }
-
-    /**
-     * Get the y-velocity
-     * @return the assigned y-velocity
-     */
-    public double getDY()
-    {
-        return this.dy;
-    }
-
-    /**
-     * Assign the x-velocity
-     * @param dx The desired x-velocity
-     */
-    public void setDX(final double dx)
-    {
-        this.dx = dx;
-    }
-
-    /**
-     * Assign the y-velocity
-     * @param dy The desired y-velocity
-     */
-    public void setDY(final double dy)
-    {
-        this.dy = dy;
-    }
-
-    /**
-     * Assign the x-coordinate
-     * @param entity The entity containing the desired x-coordinate
-     */
-    public void setX(final Entity entity)
-    {
-        setX(entity.getX());
     }
 
     /**
      * Assign the x-coordinate
      * @param x the desired x-coordinate
      */
-    public void setX(final float x)
-    {
-        this.x = x;
-    }
-
-    /**
-     * Assign the y-coordinate
-     * @param entity The entity containing the desired y-coordinate
-     */
-    public void setY(final Entity entity)
-    {
-        setY(entity.getY());
+    public void setX(final float x) {
+        getTranslation().x = x;
     }
 
     /**
      * Assign the y-coordinate
      * @param y the desired y-coordinate
      */
-    public void setY(final float y)
-    {
-        this.y = y;
+    public void setY(final float y) {
+        getTranslation().y = y;
     }
 
     /**
      * Get the x-coordinate
      * @return the x-coordinate
      */
-    public float getX()
-    {
-        return this.x;
+    public float getX() {
+        return getTranslation().x;
     }
 
     /**
      * Get the y-coordinate
      * @return the y-coordinate
      */
-    public float getY()
-    {
-        return this.y;
+    public float getY() {
+        return getTranslation().y;
     }
 
     /**
      * Get the width
      * @return get the width
      */
-    public float getWidth()
-    {
-        return this.w;
+    public float getWidth() {
+        return (getBase().right - getBase().left);
     }
 
     /**
      * Get the height
      * @return get the height
      */
-    public float getHeight()
-    {
-        return this.h;
+    public float getHeight() {
+        return (getBase().bottom - getBase().top);
     }
 
     /**
      * Assign the width
      * @param entity The object containing the width
      */
-    public void setWidth(final Entity entity)
-    {
+    public void setWidth(final Entity entity) {
         setWidth(entity.getWidth());
     }
 
@@ -274,17 +207,19 @@ public abstract class Entity extends Cell implements ICommon {
      * Assign the width
      * @param w The desired width
      */
-    public void setWidth(final float w)
-    {
-        this.w = w;
+    public void setWidth(final float w) {
+        float half = (w / 2);
+
+        //update the rectangle coordinates
+        getBase().left = -half;
+        getBase().right = half;
     }
 
     /**
      * Assign the height
      * @param entity The object containing the height
      */
-    public void setHeight(final Entity entity)
-    {
+    public void setHeight(final Entity entity) {
         setHeight(entity.getHeight());
     }
 
@@ -292,69 +227,78 @@ public abstract class Entity extends Cell implements ICommon {
      * Assign the height
      * @param h The desired height
      */
-    public void setHeight(final float h)
-    {
-        this.h = h;
+    public void setHeight(final float h) {
+
+        float half = (h / 2);
+
+        //update the rectangle coordinates
+        getBase().top = -half;
+        getBase().bottom = half;
     }
 
-    /**
-     * Render the object
-     * @param openGL Our openGL context used for rendering
-     */
-    public void render(GL10 openGL) {
+    public float[] getVertices() {
 
-        //use for quick transformations so it will only apply to this object
-        openGL.glPushMatrix();
+        //calculate at least once
+        if (this.vertices == null)
+            return getTransformedVertices(getAngle());
 
-        //assign the correct transparency if it isn't 100%
-        if (getTransparency() != TRANSPARENCY_FULL)
-            openGL.glColor4f(1.0f, 1.0f, 1.0f, getTransparency());
+        //return our array
+        return this.vertices;
+    }
 
-        //if there is an angle we rotate
-        if (getAngle() != 0.0f) {
+    public float[] getTransformedVertices(final float tmpAngle) {
 
-            //3. now move it back to complete the operation
-            openGL.glTranslatef(getX() + (getWidth() / 2), getY() + (getHeight() / 2), 0.0f);
+        float x1, x2, y1, y2;
 
-            //2. now rotate the angle
-            openGL.glRotatef(getAngle(), 0.0f, 0.0f, 1.0f);
+        //start scaling
+        x1 = getBase().left * getScale();
+        x2 = getBase().right * getScale();
+        y1 = getBase().bottom * getScale();
+        y2 = getBase().top * getScale();
 
-            //1. reset to origin as this open gl operation is done first (open gl operations done in reverse)
-            openGL.glTranslatef( -(getWidth() / 2), -(getHeight() / 2), 0.0f);
+        //now we need to detach from the points so we can start rotating
+        nw.x = x1; nw.y = y2;
+        sw.x = x1; sw.y = y1;
+        se.x = x2; se.y = y1;
+        ne.x = x2; ne.y = y2;
 
-        } else {
+        //convert to radians
+        double radians = Math.toRadians(tmpAngle);
 
-            //assign render coordinates
-            openGL.glTranslatef(getX(), getY(), 0.0f);
-        }
+        //calculate this once, so we don't have to do it every time
+        float s = (float) Math.sin(radians);
+        float c = (float) Math.cos(radians);
 
-        //assign dimensions
-        openGL.glScalef(getWidth(), getHeight(), 0.0f);
+        //rotate each point
+        nw.x = x1 * c - y2 * s;
+        nw.y = x1 * s + y2 * c;
+        sw.x = x1 * c - y1 * s;
+        sw.y = x1 * s + y1 * c;
+        se.x = x2 * c - y1 * s;
+        se.y = x2 * s + y1 * c;
+        ne.x = x2 * c - y2 * s;
+        ne.y = x2 * s + y2 * c;
 
-        //enable texture rendering
-        openGL.glEnable(GL10.GL_TEXTURE_2D);
+        //offset so we are back at the designated location
+        float tmpX = (getWidth() / 2) + getTranslation().x;
+        float tmpY = (getHeight() / 2) + getTranslation().y;
 
-        //assign texture we want to use
-        openGL.glBindTexture(GL10.GL_TEXTURE_2D, getTextureId());
+        //now translate all 4 locations to the correct location
+        nw.x += tmpX; nw.y += tmpY;
+        sw.x += tmpX; sw.y += tmpY;
+        se.x += tmpX; se.y += tmpY;
+        ne.x += tmpX; ne.y += tmpY;
 
-        //enable client state for our render
-        openGL.glEnableClientState(GL10.GL_VERTEX_ARRAY);
-        openGL.glEnableClientState(GL10.GL_TEXTURE_COORD_ARRAY);
+        if (this.vertices == null)
+            this.vertices = new float[12];
 
-        //provide our array of vertex coordinates
-        openGL.glVertexPointer(3, GL10.GL_FLOAT, 0, vertexBuffer);
+        //update our vertices with the new coordinates
+        getVertices()[0] = nw.x; getVertices()[1] = nw.y;  getVertices()[2] = 0.0f;
+        getVertices()[3] = sw.x; getVertices()[4] = sw.y;  getVertices()[5] = 0.0f;
+        getVertices()[6] = se.x; getVertices()[7] = se.y;  getVertices()[8] = 0.0f;
+        getVertices()[9] = ne.x; getVertices()[10] = ne.y; getVertices()[11] = 0.0f;
 
-        //coordinates on texture we want to render
-        openGL.glTexCoordPointer(2, GL10.GL_FLOAT, 0, textureBuffer);
-
-        //render our texture based on the texture and vertex coordinates
-        openGL.glDrawArrays(GL10.GL_TRIANGLE_STRIP, 0, vertices.length / 3);
-
-        //restore the transparency back if it isn't already 100%
-        if (getTransparency() != TRANSPARENCY_FULL)
-            openGL.glColor4f(1.0f, 1.0f, 1.0f, TRANSPARENCY_FULL);
-
-        //after rendering remove the transformation since we only needed it for this object
-        openGL.glPopMatrix();
+        //return our calculated vertices
+        return getVertices();
     }
 }
