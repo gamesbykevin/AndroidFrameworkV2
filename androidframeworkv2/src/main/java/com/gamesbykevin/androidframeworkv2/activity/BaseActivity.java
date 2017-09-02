@@ -10,7 +10,6 @@ import android.os.Vibrator;
 
 import com.gamesbykevin.androidframeworkv2.R;
 import com.gamesbykevin.androidframeworkv2.base.Disposable;
-import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -145,14 +144,10 @@ public abstract class BaseActivity extends Activity implements Disposable {
     @Override
     public void dispose() {
 
-        try {
-            //set objects null
-            preferences = null;
-            vibrator = null;
-            GSON = null;
-        } catch (Exception e) {
-            UtilityHelper.handleException(e);
-        }
+        //set objects null
+        preferences = null;
+        vibrator = null;
+        GSON = null;
     }
 
     /**

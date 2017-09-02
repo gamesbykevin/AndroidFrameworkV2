@@ -2,7 +2,7 @@ package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
 import android.util.Log;
 
-import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
+import com.gamesbykevin.androidframeworkv2.util.DebugHelper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +36,7 @@ public class EllersTest extends MazeTest {
                 //assume not generated
                 assertFalse(maze.isGenerated());
 
-                UtilityHelper.logEvent("Maze generation progress: Ellers " + maze.getProgress().getProgress());
+                DebugHelper.logEvent("Maze generation progress: Ellers " + maze.getProgress().getProgress());
 
                 //generate more
                 maze.update(RANDOM);

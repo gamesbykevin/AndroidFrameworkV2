@@ -2,8 +2,7 @@ package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
 import android.util.Log;
 
-import com.gamesbykevin.androidframeworkv2.maze.Maze;
-import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
+import com.gamesbykevin.androidframeworkv2.util.DebugHelper;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +35,7 @@ public class WilsonsTest extends MazeTest {
                 //assume not generated
                 assertFalse(maze.isGenerated());
 
-                UtilityHelper.logEvent("Maze generation progress: Wilsons " + maze.getProgress().getProgress());
+                DebugHelper.logEvent("Maze generation progress: Wilsons " + maze.getProgress().getProgress());
 
                 //generate more
                 maze.update(RANDOM);

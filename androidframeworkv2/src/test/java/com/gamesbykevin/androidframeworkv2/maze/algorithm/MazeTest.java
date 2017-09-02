@@ -1,7 +1,7 @@
 package com.gamesbykevin.androidframeworkv2.maze.algorithm;
 
 import com.gamesbykevin.androidframeworkv2.maze.Maze;
-import com.gamesbykevin.androidframeworkv2.util.UtilityHelper;
+import com.gamesbykevin.androidframeworkv2.util.DebugHelper;
 
 import java.util.Random;
 
@@ -50,7 +50,7 @@ public abstract class MazeTest {
     }
 
     public MazeTest() {
-        UtilityHelper.DEBUG = true;
-        UtilityHelper.UNIT_TEST = true;
+        DebugHelper.DEBUG = true;
+        DebugHelper.UNIT_TEST = true;
     }
 }
